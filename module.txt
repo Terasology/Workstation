@@ -1,0 +1,9 @@
+{
+    "id" : "Workstation",
+    "version" : "0.1.0",
+    "author" : "",
+    "displayName" : "Workstation",
+    "description" : "",
+    "dependencies" : [],
+    "isServerSideOnly" : false
+}
