@@ -17,13 +17,20 @@ package org.terasology.workstation.component;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.network.Replicate;
-import org.terasology.world.block.ForceBlockActive;
+import org.terasology.reflection.MappedContainer;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-@ForceBlockActive
 @Replicate
-public class WorkstationComponent implements Component {
-    public String uiPrefab;
-    public List<String> supportedProcessTypes;
+public class WorkstationProcessingComponent implements Component {
+    public Map<String, ProcessDef> processes = new HashMap<>();
+
+    @MappedContainer
+    public static class ProcessDef {
+        public String processingProcessId;
+        public String processingResultId;
+        public long processingStartTime;
+        public long processingFinishTime;
+    }
 }
