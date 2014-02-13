@@ -8,9 +8,9 @@ import org.terasology.workstation.component.WorkstationInventoryComponent;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -19,9 +19,9 @@ import java.util.Set;
 public abstract class InventoryOutputComponent implements Component, ProcessPart {
     protected abstract Set<EntityRef> createOutputItems();
 
-    private List<Integer> getOutputSlots(EntityRef workstation) {
+    private Collection<Integer> getOutputSlots(EntityRef workstation) {
         WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
-        return Collections.unmodifiableList(inventory.inputSlots);
+        return Collections.unmodifiableCollection(inventory.slotAssignments.get("OUTPUT"));
     }
 
     @Override

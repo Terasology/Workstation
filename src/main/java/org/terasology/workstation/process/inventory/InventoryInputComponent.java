@@ -9,8 +9,8 @@ import org.terasology.workstation.component.WorkstationInventoryComponent;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,9 +20,9 @@ import java.util.Set;
 public abstract class InventoryInputComponent implements Component, ProcessPart {
     protected abstract Map<Predicate<EntityRef>, Integer> getInputItems();
 
-    private List<Integer> getInputSlots(EntityRef workstation) {
+    private Collection<Integer> getInputSlots(EntityRef workstation) {
         WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
-        return Collections.unmodifiableList(inventory.inputSlots);
+        return Collections.unmodifiableCollection(inventory.slotAssignments.get("INPUT"));
     }
 
     @Override
