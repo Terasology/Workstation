@@ -56,20 +56,28 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     @ReceiveEvent
     public void finishProcessing(DelayedActionTriggeredEvent event, EntityRef workstation, WorkstationComponent workstationComp) {
         if (event.getActionId().equals(WORKSTATION_PROCESSING)) {
-            String processId = workstationComp.processingProcessId;
-            WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes, processId);
-            for (ProcessPart processPart : process.getProcessParts()) {
-                processPart.executeEnd(workstation, workstation, workstationComp.processingResultId);
-            }
-
-            workstationComp.processingProcessId = null;
-            workstationComp.processingResultId = null;
-            workstation.saveComponent(workstationComp);
+            finishProcessing(workstation, workstationComp);
         }
     }
 
     @ReceiveEvent
     public void manualWorkstationProcess(WorkstationProcessRequest event, EntityRef workstation, WorkstationComponent workstationComp) {
+        startProcessing(event, workstation, workstationComp);
+    }
+
+    private void finishProcessing(EntityRef workstation, WorkstationComponent workstationComp) {
+        String processId = workstationComp.processingProcessId;
+        WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes, processId);
+        for (ProcessPart processPart : process.getProcessParts()) {
+            processPart.executeEnd(workstation, workstation, workstationComp.processingResultId);
+        }
+
+        workstationComp.processingProcessId = null;
+        workstationComp.processingResultId = null;
+        workstation.saveComponent(workstationComp);
+    }
+
+    private void startProcessing(WorkstationProcessRequest event, EntityRef workstation, WorkstationComponent workstationComp) {
         String processId = event.getProcessId();
         String resultId = event.getResultId();
 

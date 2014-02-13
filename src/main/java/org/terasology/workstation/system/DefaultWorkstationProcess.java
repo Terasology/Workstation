@@ -17,6 +17,7 @@ package org.terasology.workstation.system;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
 
@@ -25,6 +26,7 @@ import java.util.List;
 
 public class DefaultWorkstationProcess implements WorkstationProcess {
     private String id;
+    private String processType;
     private List<ProcessPart> processParts = new LinkedList<>();
 
     public DefaultWorkstationProcess(Prefab prefab) {
@@ -32,8 +34,15 @@ public class DefaultWorkstationProcess implements WorkstationProcess {
         for (Component component : prefab.iterateComponents()) {
             if (component instanceof ProcessPart) {
                 processParts.add((ProcessPart) component);
+            } else if (component instanceof ProcessDefinitionComponent) {
+                processType = ((ProcessDefinitionComponent) component).processType;
             }
         }
+    }
+
+    @Override
+    public String getProcessType() {
+        return processType;
     }
 
     @Override

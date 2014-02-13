@@ -20,5 +20,7 @@ import java.util.List;
 public interface WorkstationProcess {
     public String getId();
 
+    public String getProcessType();
+
     public List<ProcessPart> getProcessParts();
 }
