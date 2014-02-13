@@ -17,12 +17,12 @@ package org.terasology.workstation.component;
 
 import org.terasology.entitySystem.Component;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class WorkstationInventoryComponent implements Component {
-    public Map<String, Collection<Integer>> slotAssignments;
+    public Map<String, List<Integer>> slotAssignments;
 }
