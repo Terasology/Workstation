@@ -28,9 +28,11 @@ import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.OpenWorkstationRequest;
 import org.terasology.workstation.event.WorkstationProcessRequest;
+import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,7 +52,8 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void finishProcessing(DelayedActionTriggeredEvent event, EntityRef workstation, WorkstationComponent workstationComp, WorkstationProcessingComponent workstationProcessing) {
+    public void finishProcessing(DelayedActionTriggeredEvent event, EntityRef workstation, WorkstationComponent workstationComp,
+                                 WorkstationProcessingComponent workstationProcessing) {
         String actionId = event.getActionId();
         if (actionId.equals(WorkstationUtils.WORKSTATION_PROCESSING)) {
             long gameTime = time.getGameTimeInMs();
@@ -58,8 +61,11 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
             for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
                 WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
                 if (processDef.processingFinishTime <= gameTime) {
+                    List<ProcessPart> processParts = workstationRegistry.
+                            getWorkstationProcessById(workstationComp.supportedProcessTypes, processDef.processingProcessId).
+                            getProcessParts();
                     WorkstationUtils.finishProcessing(workstation, processes.getKey(), workstationProcessing,
-                            workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes, processDef.processingProcessId).getProcessParts(), processDef.processingResultId);
+                            processParts, processDef.processingResultId);
                 }
             }
 
