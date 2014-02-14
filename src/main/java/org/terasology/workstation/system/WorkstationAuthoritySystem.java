@@ -28,7 +28,6 @@ import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.OpenWorkstationRequest;
 import org.terasology.workstation.event.WorkstationProcessRequest;
-import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
 
 import java.util.HashMap;
@@ -57,8 +56,10 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
             long gameTime = time.getGameTimeInMs();
             Map<String, WorkstationProcessingComponent.ProcessDef> processesCopy = new HashMap<>(workstationProcessing.processes);
             for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
-                if (processes.getValue().processingFinishTime <= gameTime) {
-                    finishProcessing(workstation, workstationComp, processes.getKey(), workstationProcessing);
+                WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
+                if (processDef.processingFinishTime <= gameTime) {
+                    WorkstationUtils.finishProcessing(workstation, processes.getKey(), workstationProcessing,
+                            workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes, processDef.processingProcessId).getProcessParts(), processDef.processingResultId);
                 }
             }
 
@@ -82,22 +83,4 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
             }
         }
     }
-
-    private void finishProcessing(EntityRef workstation, WorkstationComponent workstationComp, String processType, WorkstationProcessingComponent workstationProcessing) {
-        WorkstationProcessingComponent.ProcessDef processDef = workstationProcessing.processes.get(processType);
-        WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes, processDef.processingProcessId);
-
-        workstationProcessing.processes.remove(processType);
-
-        if (workstationProcessing.processes.size() > 0) {
-            workstation.saveComponent(workstationProcessing);
-        } else {
-            workstation.removeComponent(WorkstationProcessingComponent.class);
-        }
-
-        for (ProcessPart processPart : process.getProcessParts()) {
-            processPart.executeEnd(workstation, workstation, processDef.processingResultId);
-        }
-    }
-
 }
