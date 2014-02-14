@@ -17,12 +17,34 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryInputComponent implements Component, ProcessPart {
+public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem {
     protected abstract Map<Predicate<EntityRef>, Integer> getInputItems();
 
     private Collection<Integer> getInputSlots(EntityRef workstation) {
         WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
         return Collections.unmodifiableCollection(inventory.slotAssignments.get("INPUT"));
+    }
+
+    @Override
+    public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
+        for (int slot : getInputSlots(workstation)) {
+            if (slot == slotNo) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean isValid(EntityRef workstation, int slotNo, EntityRef instigator, EntityRef item) {
+        for (Predicate<EntityRef> inputPredicate : getInputItems().keySet()) {
+            if (inputPredicate.apply(item)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

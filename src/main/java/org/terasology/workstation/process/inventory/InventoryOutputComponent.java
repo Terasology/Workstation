@@ -16,12 +16,27 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryOutputComponent implements Component, ProcessPart {
+public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem {
     protected abstract Set<EntityRef> createOutputItems();
 
     private Collection<Integer> getOutputSlots(EntityRef workstation) {
         WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
         return Collections.unmodifiableCollection(inventory.slotAssignments.get("OUTPUT"));
+    }
+
+    @Override
+    public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
+        for (int slot : getOutputSlots(workstation)) {
+            if (slot == slotNo) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isValid(EntityRef workstation, int slotNo, EntityRef instigator, EntityRef item) {
+        return workstation == instigator;
     }
 
     @Override
