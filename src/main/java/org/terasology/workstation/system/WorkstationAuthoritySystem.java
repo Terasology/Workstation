@@ -64,7 +64,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
                     List<ProcessPart> processParts = workstationRegistry.
                             getWorkstationProcessById(workstationComp.supportedProcessTypes, processDef.processingProcessId).
                             getProcessParts();
-                    WorkstationUtils.finishProcessing(workstation, processes.getKey(), workstationProcessing,
+                    WorkstationUtils.finishProcessing(workstation, workstation, processes.getKey(), workstationProcessing,
                             processParts, processDef.processingResultId);
                 }
             }

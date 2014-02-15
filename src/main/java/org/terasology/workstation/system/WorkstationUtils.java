@@ -70,11 +70,11 @@ public final class WorkstationUtils {
         if (duration > 0) {
             WorkstationUtils.scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
         } else {
-            finishProcessing(workstation, process.getProcessType(), workstationProcessing, processParts, resultId);
+            finishProcessing(instigator, workstation, process.getProcessType(), workstationProcessing, processParts, resultId);
         }
     }
 
-    public static void finishProcessing(EntityRef workstation, String processType, WorkstationProcessingComponent workstationProcessing, List<ProcessPart> processParts, String resultId) {
+    public static void finishProcessing(EntityRef instigator, EntityRef workstation, String processType, WorkstationProcessingComponent workstationProcessing, List<ProcessPart> processParts, String resultId) {
         workstationProcessing.processes.remove(processType);
 
         if (workstationProcessing.processes.size() > 0) {
@@ -84,7 +84,7 @@ public final class WorkstationUtils {
         }
 
         for (ProcessPart processPart : processParts) {
-            processPart.executeEnd(workstation, workstation, resultId);
+            processPart.executeEnd(instigator, workstation, resultId);
         }
     }
 
