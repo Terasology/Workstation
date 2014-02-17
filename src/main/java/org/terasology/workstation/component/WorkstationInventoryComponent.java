@@ -18,7 +18,6 @@ package org.terasology.workstation.component;
 import org.terasology.entitySystem.Component;
 import org.terasology.reflection.MappedContainer;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,7 +27,7 @@ public class WorkstationInventoryComponent implements Component {
     public Map<String, SlotAssignment> slotAssignments;
 
     @MappedContainer
-    public class SlotAssignment {
+    public static class SlotAssignment {
         public int slotStart;
         public int slotCount;
     }
