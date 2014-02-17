@@ -5,12 +5,9 @@ import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.logic.inventory.action.RemoveItemAction;
-import org.terasology.workstation.component.WorkstationInventoryComponent;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,14 +17,9 @@ import java.util.Set;
 public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem {
     protected abstract Map<Predicate<EntityRef>, Integer> getInputItems();
 
-    private Collection<Integer> getInputSlots(EntityRef workstation) {
-        WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
-        return Collections.unmodifiableCollection(inventory.slotAssignments.get("INPUT"));
-    }
-
     @Override
     public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
-        for (int slot : getInputSlots(workstation)) {
+        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
             if (slot == slotNo) {
                 return true;
             }
@@ -54,7 +46,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
 
             int foundCount = 0;
 
-            for (int slot : getInputSlots(workstation)) {
+            for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
                 EntityRef item = InventoryUtils.getItemAt(workstation, slot);
                 if (filter.apply(item)) {
                     foundCount += InventoryUtils.getStackCount(item);
@@ -82,7 +74,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     private void removeItem(EntityRef instigator, EntityRef workstation, Predicate<EntityRef> filter, int toRemove) {
-        for (int slot : getInputSlots(workstation)) {
+        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
             EntityRef item = InventoryUtils.getItemAt(workstation, slot);
             if (filter.apply(item)) {
                 int remove = Math.min(InventoryUtils.getStackCount(item), toRemove);

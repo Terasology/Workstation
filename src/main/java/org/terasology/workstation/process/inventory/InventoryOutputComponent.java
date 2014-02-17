@@ -4,12 +4,9 @@ import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.logic.inventory.action.GiveItemAction;
-import org.terasology.workstation.component.WorkstationInventoryComponent;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,14 +16,9 @@ import java.util.Set;
 public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem {
     protected abstract Set<EntityRef> createOutputItems();
 
-    private Collection<Integer> getOutputSlots(EntityRef workstation) {
-        WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
-        return Collections.unmodifiableCollection(inventory.slotAssignments.get("OUTPUT"));
-    }
-
     @Override
     public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
-        for (int slot : getOutputSlots(workstation)) {
+        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT")) {
             if (slot == slotNo) {
                 return true;
             }
@@ -46,7 +38,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
             Set<EntityRef> itemsLeftToAssign = new HashSet<>(outputItems);
             int emptySlots = 0;
 
-            for (int slot : getOutputSlots(workstation)) {
+            for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT")) {
                 EntityRef item = InventoryUtils.getItemAt(workstation, slot);
                 if (item.exists()) {
                     for (EntityRef itemLeftToAssign : itemsLeftToAssign) {
@@ -92,7 +84,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
 
     private void addItemToInventory(EntityRef instigator, EntityRef workstation, EntityRef outputItem) {
         // First try to merge into existing slots
-        for (int slot : getOutputSlots(workstation)) {
+        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT")) {
             EntityRef item = InventoryUtils.getItemAt(workstation, slot);
             if (item.exists()) {
                 if (InventoryUtils.canStackInto(outputItem, item)) {
@@ -107,7 +99,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
         }
 
         // Then fill out empty slots
-        for (int slot : getOutputSlots(workstation)) {
+        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT")) {
             EntityRef item = InventoryUtils.getItemAt(workstation, slot);
             if (!item.exists()) {
                 GiveItemAction event = new GiveItemAction(instigator, outputItem, slot);
