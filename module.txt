@@ -1,9 +1,13 @@
 {
     "id" : "Workstation",
     "version" : "0.1.0",
-    "author" : "",
+    "author" : "Marcin Sciesinski <marcins78@gmail.com>",
     "displayName" : "Workstation",
     "description" : "",
-    "dependencies" : [],
+    "dependencies" : [
+            {
+                "id" : "Fluid",
+                "minVersion" : "0.1.0"
+            }],
     "isServerSideOnly" : false
 }
