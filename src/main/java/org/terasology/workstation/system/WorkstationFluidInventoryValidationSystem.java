@@ -25,7 +25,7 @@ import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationInventoryComponent;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
-import org.terasology.workstation.process.inventory.ValidateFluidInventoryItem;
+import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>

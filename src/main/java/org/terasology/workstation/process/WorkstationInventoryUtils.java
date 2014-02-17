@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.workstation.process.inventory;
+package org.terasology.workstation.process;
 
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.workstation.component.WorkstationInventoryComponent;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;

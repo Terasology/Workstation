@@ -60,21 +60,23 @@ public class AutomaticProcessingSystem extends BaseComponentSystem {
         }
 
         for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(possibleProcesses)) {
-            try {
-                Set<String> possibleResultIds = new HashSet<>();
-                for (ProcessPart processPart : workstationProcess.getProcessParts()) {
-                    Set<String> resultIds = processPart.validate(entity, entity);
-                    if (resultIds != null) {
-                        possibleResultIds.addAll(resultIds);
+            if (workstationProcess.isAutomatable()) {
+                try {
+                    Set<String> possibleResultIds = new HashSet<>();
+                    for (ProcessPart processPart : workstationProcess.getProcessParts()) {
+                        Set<String> resultIds = processPart.validate(entity, entity);
+                        if (resultIds != null) {
+                            possibleResultIds.addAll(resultIds);
+                        }
                     }
-                }
 
-                if (possibleResultIds.size() <= 1) {
-                    String resultId = possibleResultIds.size() == 0 ? null : possibleResultIds.iterator().next();
-                    WorkstationUtils.startProcessing(entity, entity, workstationProcess, workstationProcess.getId(), resultId, time.getGameTimeInMs());
+                    if (possibleResultIds.size() <= 1) {
+                        String resultId = possibleResultIds.size() == 0 ? null : possibleResultIds.iterator().next();
+                        WorkstationUtils.startProcessing(entity, entity, workstationProcess, workstationProcess.getId(), resultId, time.getGameTimeInMs());
+                    }
+                } catch (InvalidProcessException exp) {
+                    // Ignored - proceed to next process
                 }
-            } catch (InvalidProcessException exp) {
-                // Ignored - proceed to next process
             }
         }
     }

@@ -23,4 +23,6 @@ public interface WorkstationProcess {
     public String getProcessType();
 
     public List<ProcessPart> getProcessParts();
+
+    public boolean isAutomatable();
 }

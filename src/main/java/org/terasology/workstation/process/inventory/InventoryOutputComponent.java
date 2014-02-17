@@ -6,6 +6,7 @@ import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.logic.inventory.action.GiveItemAction;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
+import org.terasology.workstation.process.WorkstationInventoryUtils;
 
 import java.util.HashSet;
 import java.util.Set;

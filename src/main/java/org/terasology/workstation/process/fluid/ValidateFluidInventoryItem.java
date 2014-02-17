@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.workstation.process.inventory;
+package org.terasology.workstation.process.fluid;
 
 import org.terasology.entitySystem.entity.EntityRef;
 

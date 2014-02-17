@@ -19,4 +19,5 @@ import org.terasology.entitySystem.Component;
 
 public class ProcessDefinitionComponent implements Component {
     public String processType;
+    public boolean automatable;
 }

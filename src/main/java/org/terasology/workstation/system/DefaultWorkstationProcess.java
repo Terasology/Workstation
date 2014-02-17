@@ -27,6 +27,7 @@ import java.util.List;
 public class DefaultWorkstationProcess implements WorkstationProcess {
     private String id;
     private String processType;
+    private boolean automatable;
     private List<ProcessPart> processParts = new LinkedList<>();
 
     public DefaultWorkstationProcess(Prefab prefab) {
@@ -36,6 +37,7 @@ public class DefaultWorkstationProcess implements WorkstationProcess {
                 processParts.add((ProcessPart) component);
             } else if (component instanceof ProcessDefinitionComponent) {
                 processType = ((ProcessDefinitionComponent) component).processType;
+                automatable = ((ProcessDefinitionComponent) component).automatable;
             }
         }
     }
@@ -53,5 +55,10 @@ public class DefaultWorkstationProcess implements WorkstationProcess {
     @Override
     public List<ProcessPart> getProcessParts() {
         return processParts;
+    }
+
+    @Override
+    public boolean isAutomatable() {
+        return automatable;
     }
 }
