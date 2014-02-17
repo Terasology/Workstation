@@ -1,5 +1,6 @@
 package org.terasology.workstation.process.fluid;
 
+import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.fluid.component.FluidComponent;
@@ -22,7 +23,7 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public class FillFluidInventoryPart implements ProcessPart, ValidateInventoryItem {
+public class FillFluidInventoryPart implements Component, ProcessPart, ValidateInventoryItem {
     @Override
     public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
         for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_INPUT")) {
