@@ -20,6 +20,8 @@ import org.terasology.workstation.component.WorkstationInventoryComponent;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -28,8 +30,13 @@ public final class WorkstationInventoryUtils {
     private WorkstationInventoryUtils() {
     }
 
-    public static Collection<Integer> getAssignedSlots(EntityRef workstation, String type) {
+    public static List<Integer> getAssignedSlots(EntityRef workstation, String type) {
         WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
-        return Collections.unmodifiableCollection(inventory.slotAssignments.get(type));
+        WorkstationInventoryComponent.SlotAssignment slotAssignment = inventory.slotAssignments.get(type);
+        List<Integer> result = new LinkedList<>();
+        for (int i = 0; i < slotAssignment.slotCount; i++) {
+            result.add(slotAssignment.slotStart + i);
+        }
+        return Collections.unmodifiableList(result);
     }
 }
