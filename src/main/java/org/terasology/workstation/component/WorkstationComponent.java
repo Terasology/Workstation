@@ -19,11 +19,11 @@ import org.terasology.entitySystem.Component;
 import org.terasology.network.Replicate;
 import org.terasology.world.block.ForceBlockActive;
 
-import java.util.List;
+import java.util.Map;
 
 @ForceBlockActive
 @Replicate
 public class WorkstationComponent implements Component {
     public String uiPrefab;
-    public List<String> supportedProcessTypes;
+    public Map<String, Boolean> supportedProcessTypes;
 }

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.workstation.component;
+package org.terasology.workstation.event;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.event.Event;
 
-public class AutomaticProcessingComponent implements Component {
+public class WotkstationStateChanged implements Event {
 }

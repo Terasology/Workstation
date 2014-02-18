@@ -1,7 +1,6 @@
 {
     "ProcessDefinition": {
-        "processType": "Workstation:FillFluid",
-        "automatable": true
+        "processType": "Workstation:FillFluid"
     },
     "FillFluidInventoryPart": { }
 }

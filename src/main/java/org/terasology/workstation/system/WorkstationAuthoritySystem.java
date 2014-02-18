@@ -62,7 +62,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
                 WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
                 if (processDef.processingFinishTime <= gameTime) {
                     List<ProcessPart> processParts = workstationRegistry.
-                            getWorkstationProcessById(workstationComp.supportedProcessTypes, processDef.processingProcessId).
+                            getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId).
                             getProcessParts();
                     WorkstationUtils.finishProcessing(workstation, workstation, processes.getKey(), workstationProcessing,
                             processParts, processDef.processingResultId);
@@ -78,7 +78,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
         String processId = event.getProcessId();
         String resultId = event.getResultId();
 
-        WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes, processId);
+        WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processId);
         if (process != null) {
             String processType = process.getProcessType();
 
