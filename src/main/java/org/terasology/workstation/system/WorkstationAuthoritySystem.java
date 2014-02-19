@@ -34,11 +34,11 @@ import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
 
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +56,8 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
 
     private boolean executingProcess;
 
-    private Set<EntityRef> pendingWorkstationChecks = new LinkedHashSet<>();
+    // I would rather use LinkedHashSet, however cannot due to PojoEntityRef's hashcode changing when it is being destroyed.
+    private Deque<EntityRef> pendingWorkstationChecks = new LinkedList<>();
 
     @ReceiveEvent(components = {WorkstationComponent.class})
     public void userActivatesWorkstation(ActivateEvent event, EntityRef entity) {
@@ -151,9 +152,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     }
 
     private EntityRef extractFirstPendingWorkstation() {
-        Iterator<EntityRef> checksIterator = pendingWorkstationChecks.iterator();
-        EntityRef workstation = checksIterator.next();
-        checksIterator.remove();
+        EntityRef workstation = pendingWorkstationChecks.removeFirst();
         return workstation;
     }
 
