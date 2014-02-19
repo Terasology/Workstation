@@ -64,14 +64,14 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void machineAdded(OnAddedComponent event, EntityRef entity, WorkstationComponent workstationComponent, WorkstationComponent workstation) {
-        pendingWorkstationChecks.add(entity);
+    public void machineAdded(OnAddedComponent event, EntityRef workstation, WorkstationComponent workstationComponent) {
+        pendingWorkstationChecks.add(workstation);
         startProcessingIfNotExecuting();
     }
 
     @ReceiveEvent
-    public void automaticProcessingStateChanged(WotkstationStateChanged event, EntityRef entity, WorkstationComponent workstationComponent, WorkstationComponent workstation) {
-        pendingWorkstationChecks.add(entity);
+    public void automaticProcessingStateChanged(WotkstationStateChanged event, EntityRef workstation, WorkstationComponent workstationComponent) {
+        pendingWorkstationChecks.add(workstation);
         startProcessingIfNotExecuting();
     }
 
