@@ -33,6 +33,7 @@ import org.terasology.workstation.event.WotkstationStateChanged;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
+import org.terasology.world.block.BlockComponent;
 
 import java.util.Deque;
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void machineAdded(OnAddedComponent event, EntityRef workstation, WorkstationComponent workstationComponent) {
+    public void machineAdded(OnAddedComponent event, EntityRef workstation, WorkstationComponent workstationComponent, BlockComponent block) {
         pendingWorkstationChecks.add(workstation);
         startProcessingIfNotExecuting();
     }
@@ -152,8 +153,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     }
 
     private EntityRef extractFirstPendingWorkstation() {
-        EntityRef workstation = pendingWorkstationChecks.removeFirst();
-        return workstation;
+        return pendingWorkstationChecks.removeFirst();
     }
 
     private void processIfHasPendingAutomaticProcesses(EntityRef entity, WorkstationComponent workstation) {
@@ -175,7 +175,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
         }
 
         for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(possibleProcesses.keySet())) {
-            if (possibleProcesses.get(workstationProcess.getId())) {
+            if (possibleProcesses.get(workstationProcess.getProcessType())) {
                 try {
                     Set<String> possibleResultIds = new HashSet<>();
                     for (ProcessPart processPart : workstationProcess.getProcessParts()) {
