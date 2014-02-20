@@ -23,14 +23,14 @@ public final class WorkstationUtils {
     }
 
     public static void startProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process,
-                                       String processId, String resultId, long gameTime) {
+                                       String processId, String resultId, String parameter, long gameTime) {
         List<ProcessPart> processParts = process.getProcessParts();
 
         long duration = 0;
         Set<String> validResults = new HashSet<>();
         for (ProcessPart processPart : processParts) {
             try {
-                Set<String> results = processPart.validate(instigator, workstation);
+                Set<String> results = processPart.validate(instigator, workstation, parameter);
                 if (results != null) {
                     validResults.addAll(results);
                 }
@@ -44,7 +44,7 @@ public final class WorkstationUtils {
         }
 
         for (ProcessPart processPart : processParts) {
-            duration += processPart.getDuration(instigator, workstation, resultId);
+            duration += processPart.getDuration(instigator, workstation, resultId, parameter);
         }
 
         WorkstationProcessingComponent.ProcessDef processDef = new WorkstationProcessingComponent.ProcessDef();
@@ -52,6 +52,7 @@ public final class WorkstationUtils {
         processDef.processingFinishTime = gameTime + duration;
         processDef.processingProcessId = processId;
         processDef.processingResultId = resultId;
+        processDef.processingParameter = parameter;
 
         WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
         if (workstationProcessing == null) {
@@ -64,17 +65,18 @@ public final class WorkstationUtils {
         }
 
         for (ProcessPart processPart : processParts) {
-            processPart.executeStart(instigator, workstation, resultId);
+            processPart.executeStart(instigator, workstation, resultId, parameter);
         }
 
         if (duration > 0) {
             WorkstationUtils.scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
         } else {
-            finishProcessing(instigator, workstation, process.getProcessType(), workstationProcessing, processParts, resultId);
+            finishProcessing(instigator, workstation, process.getProcessType(), workstationProcessing, processParts, resultId, parameter);
         }
     }
 
-    public static void finishProcessing(EntityRef instigator, EntityRef workstation, String processType, WorkstationProcessingComponent workstationProcessing, List<ProcessPart> processParts, String resultId) {
+    public static void finishProcessing(EntityRef instigator, EntityRef workstation, String processType, WorkstationProcessingComponent workstationProcessing,
+                                        List<ProcessPart> processParts, String resultId, String parameter) {
         workstationProcessing.processes.remove(processType);
 
         if (workstationProcessing.processes.size() > 0) {
@@ -84,7 +86,7 @@ public final class WorkstationUtils {
         }
 
         for (ProcessPart processPart : processParts) {
-            processPart.executeEnd(instigator, workstation, resultId);
+            processPart.executeEnd(instigator, workstation, resultId, parameter);
         }
     }
 

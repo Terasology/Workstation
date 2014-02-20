@@ -78,7 +78,7 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
     }
 
     @Override
-    public Set<String> validate(EntityRef instigator, EntityRef workstation) throws InvalidProcessException {
+    public Set<String> validate(EntityRef instigator, EntityRef workstation, String parameter) throws InvalidProcessException {
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
 
         FluidInventoryComponent fluidInventory = workstation.getComponent(FluidInventoryComponent.class);
@@ -130,12 +130,12 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
     }
 
     @Override
-    public long getDuration(EntityRef instigator, EntityRef workstation, String result) {
+    public long getDuration(EntityRef instigator, EntityRef workstation, String result, String parameter) {
         return 0;
     }
 
     @Override
-    public void executeStart(EntityRef instigator, EntityRef workstation, String result) {
+    public void executeStart(EntityRef instigator, EntityRef workstation, String result, String parameter) {
         FluidManager fluidManager = CoreRegistry.get(FluidManager.class);
 
         int slot = Integer.parseInt(result);
@@ -169,6 +169,6 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
     }
 
     @Override
-    public void executeEnd(EntityRef instigator, EntityRef workstation, String result) {
+    public void executeEnd(EntityRef instigator, EntityRef workstation, String result, String parameter) {
     }
 }

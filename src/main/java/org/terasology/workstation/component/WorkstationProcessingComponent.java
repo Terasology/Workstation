@@ -30,6 +30,7 @@ public class WorkstationProcessingComponent implements Component {
     public static class ProcessDef {
         public String processingProcessId;
         public String processingResultId;
+        public String processingParameter;
         public long processingStartTime;
         public long processingFinishTime;
     }

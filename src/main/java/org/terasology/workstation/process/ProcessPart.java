@@ -30,10 +30,11 @@ public interface ProcessPart {
      *
      * @param instigator
      * @param workstation
+     * @param parameter
      * @return
      * @throws InvalidProcessException
      */
-    public Set<String> validate(EntityRef instigator, EntityRef workstation) throws InvalidProcessException;
+    public Set<String> validate(EntityRef instigator, EntityRef workstation, String parameter) throws InvalidProcessException;
 
     /**
      * Returns duration for this process. All the ProcessParts are queried, and the sum of all results becomes
@@ -42,9 +43,10 @@ public interface ProcessPart {
      * @param instigator
      * @param workstation
      * @param result
+     * @param parameter
      * @return
      */
-    public long getDuration(EntityRef instigator, EntityRef workstation, String result);
+    public long getDuration(EntityRef instigator, EntityRef workstation, String result, String parameter);
 
     /**
      * Starts the execution of the process. In this step, for example, all the products, energy and other consumables
@@ -53,8 +55,9 @@ public interface ProcessPart {
      * @param instigator
      * @param workstation
      * @param result
+     * @param parameter
      */
-    public void executeStart(EntityRef instigator, EntityRef workstation, String result);
+    public void executeStart(EntityRef instigator, EntityRef workstation, String result, String parameter);
 
     /**
      * Finishes the execution of the process. In this step, for example, all the resulting blocks/items could be
@@ -63,6 +66,7 @@ public interface ProcessPart {
      * @param instigator
      * @param workstation
      * @param result
+     * @param parameter;
      */
-    public void executeEnd(EntityRef instigator, EntityRef workstation, String result);
+    public void executeEnd(EntityRef instigator, EntityRef workstation, String result, String parameter);
 }

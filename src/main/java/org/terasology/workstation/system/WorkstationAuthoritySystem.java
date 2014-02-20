@@ -93,7 +93,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
                                 getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId).
                                 getProcessParts();
                         WorkstationUtils.finishProcessing(workstation, workstation, processes.getKey(), workstationProcessing,
-                                processParts, processDef.processingResultId);
+                                processParts, processDef.processingResultId, processDef.processingParameter);
                     }
                 }
 
@@ -110,6 +110,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     public void manualWorkstationProcess(WorkstationProcessRequest event, EntityRef workstation, WorkstationComponent workstationComp) {
         String processId = event.getProcessId();
         String resultId = event.getResultId();
+        String parameter = event.getParameter();
 
         WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processId);
         if (process != null) {
@@ -120,7 +121,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
             if (workstationProcessing == null || !workstationProcessing.processes.containsKey(processType)) {
                 executingProcess = true;
                 try {
-                    WorkstationUtils.startProcessing(event.getInstigator(), workstation, process, processId, resultId, time.getGameTimeInMs());
+                    WorkstationUtils.startProcessing(event.getInstigator(), workstation, process, processId, resultId, parameter, time.getGameTimeInMs());
                 } finally {
                     executingProcess = false;
                 }
@@ -179,7 +180,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
                 try {
                     Set<String> possibleResultIds = new HashSet<>();
                     for (ProcessPart processPart : workstationProcess.getProcessParts()) {
-                        Set<String> resultIds = processPart.validate(entity, entity);
+                        Set<String> resultIds = processPart.validate(entity, entity, null);
                         if (resultIds != null) {
                             possibleResultIds.addAll(resultIds);
                         }
@@ -187,7 +188,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
 
                     if (possibleResultIds.size() <= 1) {
                         String resultId = possibleResultIds.size() == 0 ? null : possibleResultIds.iterator().next();
-                        WorkstationUtils.startProcessing(entity, entity, workstationProcess, workstationProcess.getId(), resultId, time.getGameTimeInMs());
+                        WorkstationUtils.startProcessing(entity, entity, workstationProcess, workstationProcess.getId(), resultId, null, time.getGameTimeInMs());
                     }
                 } catch (InvalidProcessException exp) {
                     // Ignored - proceed to next process

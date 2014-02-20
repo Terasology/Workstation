@@ -27,14 +27,16 @@ public class WorkstationProcessRequest implements Event {
     private EntityRef instigator;
     private String processId;
     private String resultId;
+    private String parameter;
 
     public WorkstationProcessRequest() {
     }
 
-    public WorkstationProcessRequest(EntityRef instigator, String processId, String resultId) {
+    public WorkstationProcessRequest(EntityRef instigator, String processId, String resultId, String parameter) {
         this.instigator = instigator;
         this.processId = processId;
         this.resultId = resultId;
+        this.parameter = parameter;
     }
 
     public EntityRef getInstigator() {
@@ -47,5 +49,9 @@ public class WorkstationProcessRequest implements Event {
 
     public String getResultId() {
         return resultId;
+    }
+
+    public String getParameter() {
+        return parameter;
     }
 }
