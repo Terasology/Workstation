@@ -24,6 +24,7 @@ import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
+import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
@@ -80,6 +81,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     @ReceiveEvent
     public void finishProcessing(DelayedActionTriggeredEvent event, EntityRef workstation, WorkstationComponent workstationComp,
                                  WorkstationProcessingComponent workstationProcessing) {
+        PerformanceMonitor.startActivity("Workstation - finishing process");
         executingProcess = true;
         try {
             String actionId = event.getActionId();
@@ -103,6 +105,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
             }
         } finally {
             executingProcess = false;
+            PerformanceMonitor.endActivity();
         }
     }
 
@@ -142,14 +145,19 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     }
 
     private void processPendingChecks() {
-        while (!pendingWorkstationChecks.isEmpty()) {
-            EntityRef workstation = extractFirstPendingWorkstation();
-            if (workstation.exists()) {
-                WorkstationComponent workstationComp = workstation.getComponent(WorkstationComponent.class);
-                if (workstationComp != null) {
-                    processIfHasPendingAutomaticProcesses(workstation, workstationComp);
+        PerformanceMonitor.startActivity("Workstation - processing pending checks");
+        try {
+            while (!pendingWorkstationChecks.isEmpty()) {
+                EntityRef workstation = extractFirstPendingWorkstation();
+                if (workstation.exists()) {
+                    WorkstationComponent workstationComp = workstation.getComponent(WorkstationComponent.class);
+                    if (workstationComp != null) {
+                        processIfHasPendingAutomaticProcesses(workstation, workstationComp);
+                    }
                 }
             }
+        } finally {
+            PerformanceMonitor.endActivity();
         }
     }
 
