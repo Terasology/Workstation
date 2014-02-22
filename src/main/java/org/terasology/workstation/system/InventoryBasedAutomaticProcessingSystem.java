@@ -23,17 +23,17 @@ import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.logic.inventory.events.InventorySlotChangedEvent;
 import org.terasology.logic.inventory.events.InventorySlotStackSizeChangedEvent;
 import org.terasology.workstation.component.WorkstationComponent;
-import org.terasology.workstation.event.WotkstationStateChanged;
+import org.terasology.workstation.event.WorkstationStateChanged;
 
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class InventoryBasedAutomaticProcessingSystem extends BaseComponentSystem {
     @ReceiveEvent
     public void newItemInMachine(InventorySlotChangedEvent event, EntityRef workstation, WorkstationComponent workstationComponent) {
-        workstation.send(new WotkstationStateChanged());
+        workstation.send(new WorkstationStateChanged());
     }
 
     @ReceiveEvent
     public void itemCountChangedInMachine(InventorySlotStackSizeChangedEvent event, EntityRef workstation, WorkstationComponent workstationComponent) {
-        workstation.send(new WotkstationStateChanged());
+        workstation.send(new WorkstationStateChanged());
     }
 }

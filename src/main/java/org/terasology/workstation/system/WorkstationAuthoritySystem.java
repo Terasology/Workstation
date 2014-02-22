@@ -29,7 +29,7 @@ import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.OpenWorkstationRequest;
 import org.terasology.workstation.event.WorkstationProcessRequest;
-import org.terasology.workstation.event.WotkstationStateChanged;
+import org.terasology.workstation.event.WorkstationStateChanged;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
@@ -72,7 +72,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void automaticProcessingStateChanged(WotkstationStateChanged event, EntityRef workstation, WorkstationComponent workstationComponent) {
+    public void automaticProcessingStateChanged(WorkstationStateChanged event, EntityRef workstation, WorkstationComponent workstationComponent) {
         pendingWorkstationChecks.add(workstation);
         startProcessingIfNotExecuting();
     }

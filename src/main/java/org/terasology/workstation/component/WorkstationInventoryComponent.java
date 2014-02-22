@@ -15,19 +15,30 @@
  */
 package org.terasology.workstation.component;
 
+import com.google.common.collect.Maps;
 import org.terasology.entitySystem.Component;
 import org.terasology.reflection.MappedContainer;
+import org.terasology.world.block.ForceBlockActive;
 
 import java.util.Map;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
+@ForceBlockActive
 public class WorkstationInventoryComponent implements Component {
-    public Map<String, SlotAssignment> slotAssignments;
+    public Map<String, SlotAssignment> slotAssignments = Maps.newHashMap();
 
     @MappedContainer
     public static class SlotAssignment {
+        public SlotAssignment() {
+        }
+
+        public SlotAssignment(int slotStart, int slotCount) {
+            this.slotStart = slotStart;
+            this.slotCount = slotCount;
+        }
+
         public int slotStart;
         public int slotCount;
     }

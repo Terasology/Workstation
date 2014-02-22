@@ -17,5 +17,5 @@ package org.terasology.workstation.event;
 
 import org.terasology.entitySystem.event.Event;
 
-public class WotkstationStateChanged implements Event {
+public class WorkstationStateChanged implements Event {
 }
