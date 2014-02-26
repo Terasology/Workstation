@@ -41,7 +41,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     @Override
-    public Set<String> validate(EntityRef instigator, EntityRef workstation, String parameter) throws InvalidProcessException {
+    public Set<String> validate(EntityRef instigator, EntityRef workstation) throws InvalidProcessException {
         for (Map.Entry<Predicate<EntityRef>, Integer> requiredItem : getInputItems().entrySet()) {
             Predicate<EntityRef> filter = requiredItem.getKey();
 
@@ -63,12 +63,12 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     @Override
-    public long getDuration(EntityRef instigator, EntityRef workstation, String result, String parameter) {
+    public long getDuration(EntityRef instigator, EntityRef workstation, String result) {
         return 0;
     }
 
     @Override
-    public void executeStart(EntityRef instigator, EntityRef workstation, String result, String parameter) {
+    public void executeStart(EntityRef instigator, EntityRef workstation, String result) {
         for (Map.Entry<Predicate<EntityRef>, Integer> requiredItem : getInputItems().entrySet()) {
             removeItem(instigator, workstation, requiredItem.getKey(), requiredItem.getValue());
         }
@@ -89,6 +89,6 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     @Override
-    public void executeEnd(EntityRef instigator, EntityRef workstation, String result, String parameter) {
+    public void executeEnd(EntityRef instigator, EntityRef workstation, String result) {
     }
 }

@@ -23,7 +23,6 @@ import org.terasology.logic.inventory.events.BeforeItemPutInInventory;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationInventoryComponent;
-import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.inventory.ValidateInventoryItem;
 
@@ -42,14 +41,12 @@ public class WorkstationInventoryValidationSystem extends BaseComponentSystem {
 
         boolean hasValidation = false;
         for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(workstation.supportedProcessTypes.keySet())) {
-            for (ProcessPart processPart : workstationProcess.getProcessParts()) {
-                if (processPart instanceof ValidateInventoryItem) {
-                    ValidateInventoryItem inventoryValidator = (ValidateInventoryItem) processPart;
-                    if (inventoryValidator.isResponsibleForSlot(entity, slot)) {
-                        hasValidation = true;
-                        if (inventoryValidator.isValid(entity, slot, event.getInstigator(), event.getItem())) {
-                            return;
-                        }
+            if (workstationProcess instanceof ValidateInventoryItem) {
+                ValidateInventoryItem inventoryValidator = (ValidateInventoryItem) workstationProcess;
+                if (inventoryValidator.isResponsibleForSlot(entity, slot)) {
+                    hasValidation = true;
+                    if (inventoryValidator.isValid(entity, slot, event.getInstigator(), event.getItem())) {
+                        return;
                     }
                 }
             }

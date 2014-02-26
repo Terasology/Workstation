@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.workstation.system;
+package org.terasology.workstation.component;
 
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.workstation.process.WorkstationProcess;
+import org.terasology.entitySystem.Component;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
-public class DefaultWorkstationProcessFactory implements WorkstationProcessFactory {
-    @Override
-    public WorkstationProcess createProcess(Prefab prefab) {
-        return new ProcessPartWorkstationProcess(prefab);
-    }
+public class ProcessPartExecutionComponent implements Component {
+    public String result;
 }

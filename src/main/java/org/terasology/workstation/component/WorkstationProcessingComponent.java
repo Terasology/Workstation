@@ -16,6 +16,7 @@
 package org.terasology.workstation.component;
 
 import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.network.Replicate;
 import org.terasology.reflection.MappedContainer;
 
@@ -29,8 +30,7 @@ public class WorkstationProcessingComponent implements Component {
     @MappedContainer
     public static class ProcessDef {
         public String processingProcessId;
-        public String processingResultId;
-        public String processingParameter;
+        public EntityRef processEntity;
         public long processingStartTime;
         public long processingFinishTime;
     }

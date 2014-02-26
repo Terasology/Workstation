@@ -1,17 +1,15 @@
 package org.terasology.workstation.system;
 
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.delay.AddDelayedActionEvent;
 import org.terasology.logic.delay.CancelDelayedActionEvent;
 import org.terasology.logic.delay.GetDelayedActionEvent;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
+import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.InvalidProcessException;
-import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -22,62 +20,77 @@ public final class WorkstationUtils {
     private WorkstationUtils() {
     }
 
-    public static void startProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process,
-                                       String processId, String resultId, String parameter, long gameTime) {
-        List<ProcessPart> processParts = process.getProcessParts();
+    public static void startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcess process,
+                                             WorkstationProcessRequest request, long gameTime) {
+        final EntityManager entityManager = CoreRegistry.get(EntityManager.class);
 
-        long duration = 0;
-        Set<String> validResults = new HashSet<>();
-        for (ProcessPart processPart : processParts) {
-            try {
-                Set<String> results = processPart.validate(instigator, workstation, parameter);
-                if (results != null) {
-                    validResults.addAll(results);
-                }
-            } catch (InvalidProcessException exp) {
-                return;
+        final EntityRef processEntity = entityManager.create();
+
+        try {
+            final long duration = process.startProcessingManual(instigator, workstation, request, processEntity);
+
+            WorkstationProcessingComponent.ProcessDef processDef = new WorkstationProcessingComponent.ProcessDef();
+            processDef.processingStartTime = gameTime;
+            processDef.processingFinishTime = gameTime + duration;
+            processDef.processingProcessId = process.getId();
+            processDef.processEntity = processEntity;
+
+            WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+            if (workstationProcessing == null) {
+                workstationProcessing = new WorkstationProcessingComponent();
+                workstationProcessing.processes.put(process.getProcessType(), processDef);
+                workstation.addComponent(workstationProcessing);
+            } else {
+                workstationProcessing.processes.put(process.getProcessType(), processDef);
+                workstation.saveComponent(workstationProcessing);
             }
-        }
 
-        if (resultId != null && !validResults.contains(resultId)) {
-            return;
-        }
-
-        for (ProcessPart processPart : processParts) {
-            duration += processPart.getDuration(instigator, workstation, resultId, parameter);
-        }
-
-        WorkstationProcessingComponent.ProcessDef processDef = new WorkstationProcessingComponent.ProcessDef();
-        processDef.processingStartTime = gameTime;
-        processDef.processingFinishTime = gameTime + duration;
-        processDef.processingProcessId = processId;
-        processDef.processingResultId = resultId;
-        processDef.processingParameter = parameter;
-
-        WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
-        if (workstationProcessing == null) {
-            workstationProcessing = new WorkstationProcessingComponent();
-            workstationProcessing.processes.put(process.getProcessType(), processDef);
-            workstation.addComponent(workstationProcessing);
-        } else {
-            workstationProcessing.processes.put(process.getProcessType(), processDef);
-            workstation.saveComponent(workstationProcessing);
-        }
-
-        for (ProcessPart processPart : processParts) {
-            processPart.executeStart(instigator, workstation, resultId, parameter);
-        }
-
-        if (duration > 0) {
-            WorkstationUtils.scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
-        } else {
-            finishProcessing(instigator, workstation, process.getProcessType(), workstationProcessing, processParts, resultId, parameter);
+            if (duration > 0) {
+                WorkstationUtils.scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
+            } else {
+                finishProcessing(workstation, process, workstationProcessing);
+            }
+        } catch (InvalidProcessException exp) {
+            processEntity.destroy();
         }
     }
 
-    public static void finishProcessing(EntityRef instigator, EntityRef workstation, String processType, WorkstationProcessingComponent workstationProcessing,
-                                        List<ProcessPart> processParts, String resultId, String parameter) {
-        workstationProcessing.processes.remove(processType);
+    public static void startProcessingAutomatic(EntityRef workstation, WorkstationProcess process, long gameTime) {
+        final EntityManager entityManager = CoreRegistry.get(EntityManager.class);
+
+        final EntityRef processEntity = entityManager.create();
+
+        try {
+            final long duration = process.startProcessingAutomatic(workstation, processEntity);
+
+            WorkstationProcessingComponent.ProcessDef processDef = new WorkstationProcessingComponent.ProcessDef();
+            processDef.processingStartTime = gameTime;
+            processDef.processingFinishTime = gameTime + duration;
+            processDef.processingProcessId = process.getId();
+            processDef.processEntity = processEntity;
+
+            WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+            if (workstationProcessing == null) {
+                workstationProcessing = new WorkstationProcessingComponent();
+                workstationProcessing.processes.put(process.getProcessType(), processDef);
+                workstation.addComponent(workstationProcessing);
+            } else {
+                workstationProcessing.processes.put(process.getProcessType(), processDef);
+                workstation.saveComponent(workstationProcessing);
+            }
+
+            if (duration > 0) {
+                scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
+            } else {
+                finishProcessing(workstation, process, workstationProcessing);
+            }
+        } catch (InvalidProcessException exp) {
+            processEntity.destroy();
+        }
+    }
+
+    private static void finishProcessing(EntityRef workstation, WorkstationProcess process, WorkstationProcessingComponent workstationProcessing) {
+        final WorkstationProcessingComponent.ProcessDef processDef = workstationProcessing.processes.remove(process.getProcessType());
 
         if (workstationProcessing.processes.size() > 0) {
             workstation.saveComponent(workstationProcessing);
@@ -85,9 +98,13 @@ public final class WorkstationUtils {
             workstation.removeComponent(WorkstationProcessingComponent.class);
         }
 
-        for (ProcessPart processPart : processParts) {
-            processPart.executeEnd(instigator, workstation, resultId, parameter);
-        }
+        process.finishProcessing(workstation, processDef.processEntity);
+
+        processDef.processEntity.destroy();
+    }
+
+    public static void finishProcessing(EntityRef workstation, WorkstationProcess process) {
+        finishProcessing(workstation, process, workstation.getComponent(WorkstationProcessingComponent.class));
     }
 
     public static void scheduleWorkstationWakeUpIfNecessary(EntityRef workstation, long currentTime) {

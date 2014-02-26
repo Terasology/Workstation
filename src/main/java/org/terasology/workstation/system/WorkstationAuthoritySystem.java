@@ -16,6 +16,7 @@
 package org.terasology.workstation.system;
 
 import org.terasology.engine.Time;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
 import org.terasology.entitySystem.event.ReceiveEvent;
@@ -31,30 +32,26 @@ import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.OpenWorkstationRequest;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.event.WorkstationStateChanged;
-import org.terasology.workstation.process.InvalidProcessException;
-import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.world.block.BlockComponent;
 
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class WorkstationAuthoritySystem extends BaseComponentSystem {
-
     @In
     private WorkstationRegistry workstationRegistry;
     @In
     private Time time;
+    @In
+    private EntityManager entityManager;
 
     private boolean executingProcess;
 
@@ -91,11 +88,9 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
                 for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
                     WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
                     if (processDef.processingFinishTime <= gameTime) {
-                        List<ProcessPart> processParts = workstationRegistry.
-                                getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId).
-                                getProcessParts();
-                        WorkstationUtils.finishProcessing(workstation, workstation, processes.getKey(), workstationProcessing,
-                                processParts, processDef.processingResultId, processDef.processingParameter);
+                        final WorkstationProcess workstationProcess = workstationRegistry.
+                                getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
+                        WorkstationUtils.finishProcessing(workstation, workstationProcess);
                     }
                 }
 
@@ -112,8 +107,6 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     @ReceiveEvent
     public void manualWorkstationProcess(WorkstationProcessRequest event, EntityRef workstation, WorkstationComponent workstationComp) {
         String processId = event.getProcessId();
-        String resultId = event.getResultId();
-        String parameter = event.getParameter();
 
         WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processId);
         if (process != null) {
@@ -124,7 +117,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
             if (workstationProcessing == null || !workstationProcessing.processes.containsKey(processType)) {
                 executingProcess = true;
                 try {
-                    WorkstationUtils.startProcessing(event.getInstigator(), workstation, process, processId, resultId, parameter, time.getGameTimeInMs());
+                    WorkstationUtils.startProcessingManual(event.getInstigator(), workstation, process, event, time.getGameTimeInMs());
                 } finally {
                     executingProcess = false;
                 }
@@ -185,22 +178,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
 
         for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(possibleProcesses.keySet())) {
             if (possibleProcesses.get(workstationProcess.getProcessType())) {
-                try {
-                    Set<String> possibleResultIds = new HashSet<>();
-                    for (ProcessPart processPart : workstationProcess.getProcessParts()) {
-                        Set<String> resultIds = processPart.validate(entity, entity, null);
-                        if (resultIds != null) {
-                            possibleResultIds.addAll(resultIds);
-                        }
-                    }
-
-                    if (possibleResultIds.size() <= 1) {
-                        String resultId = possibleResultIds.size() == 0 ? null : possibleResultIds.iterator().next();
-                        WorkstationUtils.startProcessing(entity, entity, workstationProcess, workstationProcess.getId(), resultId, null, time.getGameTimeInMs());
-                    }
-                } catch (InvalidProcessException exp) {
-                    // Ignored - proceed to next process
-                }
+                WorkstationUtils.startProcessingAutomatic(entity, workstationProcess, time.getGameTimeInMs());
             }
         }
     }

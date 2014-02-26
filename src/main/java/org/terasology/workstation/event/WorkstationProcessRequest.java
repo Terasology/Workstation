@@ -26,17 +26,13 @@ import org.terasology.network.ServerEvent;
 public class WorkstationProcessRequest implements Event {
     private EntityRef instigator;
     private String processId;
-    private String resultId;
-    private String parameter;
 
     public WorkstationProcessRequest() {
     }
 
-    public WorkstationProcessRequest(EntityRef instigator, String processId, String resultId, String parameter) {
+    public WorkstationProcessRequest(EntityRef instigator, String processId) {
         this.instigator = instigator;
         this.processId = processId;
-        this.resultId = resultId;
-        this.parameter = parameter;
     }
 
     public EntityRef getInstigator() {
@@ -45,13 +41,5 @@ public class WorkstationProcessRequest implements Event {
 
     public String getProcessId() {
         return processId;
-    }
-
-    public String getResultId() {
-        return resultId;
-    }
-
-    public String getParameter() {
-        return parameter;
     }
 }

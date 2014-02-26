@@ -23,7 +23,6 @@ import org.terasology.fluid.event.BeforeFluidPutInInventory;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationInventoryComponent;
-import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 
@@ -42,14 +41,12 @@ public class WorkstationFluidInventoryValidationSystem extends BaseComponentSyst
 
         boolean hasValidation = false;
         for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(workstation.supportedProcessTypes.keySet())) {
-            for (ProcessPart processPart : workstationProcess.getProcessParts()) {
-                if (processPart instanceof ValidateFluidInventoryItem) {
-                    ValidateFluidInventoryItem inventoryValidator = (ValidateFluidInventoryItem) processPart;
-                    if (inventoryValidator.isResponsibleForFluidSlot(entity, slot)) {
-                        hasValidation = true;
-                        if (inventoryValidator.isValidFluid(entity, slot, event.getInstigator(), event.getFluidType())) {
-                            return;
-                        }
+            if (workstationProcess instanceof ValidateFluidInventoryItem) {
+                ValidateFluidInventoryItem inventoryValidator = (ValidateFluidInventoryItem) workstationProcess;
+                if (inventoryValidator.isResponsibleForFluidSlot(entity, slot)) {
+                    hasValidation = true;
+                    if (inventoryValidator.isValidFluid(entity, slot, event.getInstigator(), event.getFluidType())) {
+                        return;
                     }
                 }
             }
