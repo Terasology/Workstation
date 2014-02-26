@@ -27,5 +27,5 @@ public interface WorkstationProcess {
 
     public long startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcessRequest request, EntityRef processEntity) throws InvalidProcessException;
 
-    public void finishProcessing(EntityRef workstation, EntityRef processEntity);
+    public void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
 }

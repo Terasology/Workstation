@@ -158,10 +158,10 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     @Override
-    public void finishProcessing(EntityRef workstation, EntityRef processEntity) {
+    public void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         final ProcessPartExecutionComponent result = processEntity.getComponent(ProcessPartExecutionComponent.class);
         for (ProcessPart processPart : processParts) {
-            processPart.executeEnd(workstation, workstation, result.result);
+            processPart.executeEnd(instigator, workstation, result.result);
         }
     }
 }

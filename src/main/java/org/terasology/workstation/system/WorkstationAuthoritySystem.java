@@ -90,7 +90,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
                     if (processDef.processingFinishTime <= gameTime) {
                         final WorkstationProcess workstationProcess = workstationRegistry.
                                 getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
-                        WorkstationUtils.finishProcessing(workstation, workstationProcess);
+                        WorkstationUtils.finishProcessing(workstation, workstation, workstationProcess);
                     }
                 }
 

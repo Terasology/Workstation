@@ -48,7 +48,7 @@ public final class WorkstationUtils {
             if (duration > 0) {
                 WorkstationUtils.scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
             } else {
-                finishProcessing(workstation, process, workstationProcessing);
+                finishProcessing(instigator, workstation, process, workstationProcessing);
             }
         } catch (InvalidProcessException exp) {
             processEntity.destroy();
@@ -82,14 +82,14 @@ public final class WorkstationUtils {
             if (duration > 0) {
                 scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
             } else {
-                finishProcessing(workstation, process, workstationProcessing);
+                finishProcessing(workstation, workstation, process, workstationProcessing);
             }
         } catch (InvalidProcessException exp) {
             processEntity.destroy();
         }
     }
 
-    private static void finishProcessing(EntityRef workstation, WorkstationProcess process, WorkstationProcessingComponent workstationProcessing) {
+    private static void finishProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process, WorkstationProcessingComponent workstationProcessing) {
         final WorkstationProcessingComponent.ProcessDef processDef = workstationProcessing.processes.remove(process.getProcessType());
 
         if (workstationProcessing.processes.size() > 0) {
@@ -98,13 +98,13 @@ public final class WorkstationUtils {
             workstation.removeComponent(WorkstationProcessingComponent.class);
         }
 
-        process.finishProcessing(workstation, processDef.processEntity);
+        process.finishProcessing(instigator, workstation, processDef.processEntity);
 
         processDef.processEntity.destroy();
     }
 
-    public static void finishProcessing(EntityRef workstation, WorkstationProcess process) {
-        finishProcessing(workstation, process, workstation.getComponent(WorkstationProcessingComponent.class));
+    public static void finishProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process) {
+        finishProcessing(instigator, workstation, process, workstation.getComponent(WorkstationProcessingComponent.class));
     }
 
     public static void scheduleWorkstationWakeUpIfNecessary(EntityRef workstation, long currentTime) {
