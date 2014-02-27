@@ -24,7 +24,7 @@ public class ItemPrefabInputComponent extends InventoryInputComponent {
         return result;
     }
 
-    private final static class ItemPrefabPredicate implements Predicate<EntityRef> {
+    private static final class ItemPrefabPredicate implements Predicate<EntityRef> {
         private AssetUri prefab;
 
         private ItemPrefabPredicate(AssetUri prefab) {

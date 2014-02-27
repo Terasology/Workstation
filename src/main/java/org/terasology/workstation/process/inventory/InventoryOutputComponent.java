@@ -33,7 +33,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     }
 
     @Override
-    public Set<String> validate(EntityRef instigator, EntityRef workstation) throws InvalidProcessException {
+    public boolean validate(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
         Set<EntityRef> outputItems = createOutputItems();
         try {
             Set<EntityRef> itemsLeftToAssign = new HashSet<>(outputItems);
@@ -62,20 +62,20 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
             }
         }
 
-        return null;
+        return true;
     }
 
     @Override
-    public long getDuration(EntityRef instigator, EntityRef workstation, String result) {
+    public long getDuration(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         return 0;
     }
 
     @Override
-    public void executeStart(EntityRef instigator, EntityRef workstation, String result) {
+    public void executeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
     }
 
     @Override
-    public void executeEnd(EntityRef instigator, EntityRef workstation, String result) {
+    public void executeEnd(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         Set<EntityRef> outputItems = createOutputItems();
 
         for (EntityRef outputItem : outputItems) {

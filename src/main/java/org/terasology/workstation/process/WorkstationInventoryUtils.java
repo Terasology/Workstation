@@ -31,10 +31,12 @@ public final class WorkstationInventoryUtils {
 
     public static List<Integer> getAssignedSlots(EntityRef workstation, String type) {
         WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
-        WorkstationInventoryComponent.SlotAssignment slotAssignment = inventory.slotAssignments.get(type);
         List<Integer> result = new LinkedList<>();
-        for (int i = 0; i < slotAssignment.slotCount; i++) {
-            result.add(slotAssignment.slotStart + i);
+        if( inventory != null ) {
+            WorkstationInventoryComponent.SlotAssignment slotAssignment = inventory.slotAssignments.get(type);
+            for (int i = 0; i < slotAssignment.slotCount; i++) {
+                result.add(slotAssignment.slotStart + i);
+            }
         }
         return Collections.unmodifiableList(result);
     }

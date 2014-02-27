@@ -19,7 +19,6 @@ import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
-import org.terasology.workstation.component.ProcessPartExecutionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
@@ -27,10 +26,8 @@ import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 import org.terasology.workstation.process.inventory.ValidateInventoryItem;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem {
     private String id;
@@ -127,41 +124,28 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     private long startProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
-        Set<String> validResults = new HashSet<>();
         for (ProcessPart processPart : processParts) {
-            final Set<String> validatedResult = processPart.validate(instigator, workstation);
-            if (validatedResult != null) {
-                validResults.addAll(validatedResult);
+            if(!processPart.validate(instigator, workstation, processEntity)) {
+                throw new InvalidProcessException();
             }
         }
 
-        if (validResults.size() != 1) {
-            throw new InvalidProcessException();
-        }
-
-        final String result = validResults.iterator().next();
-
         long duration = 0;
         for (ProcessPart processPart : processParts) {
-            duration += processPart.getDuration(instigator, workstation, result);
+            duration += processPart.getDuration(instigator, workstation, processEntity);
         }
 
         for (ProcessPart processPart : processParts) {
-            processPart.executeStart(instigator, workstation, result);
+            processPart.executeStart(instigator, workstation, processEntity);
         }
-
-        ProcessPartExecutionComponent execution = new ProcessPartExecutionComponent();
-        execution.result = result;
-        processEntity.addComponent(execution);
 
         return duration;
     }
 
     @Override
     public void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
-        final ProcessPartExecutionComponent result = processEntity.getComponent(ProcessPartExecutionComponent.class);
         for (ProcessPart processPart : processParts) {
-            processPart.executeEnd(instigator, workstation, result.result);
+            processPart.executeEnd(instigator, workstation, processEntity);
         }
     }
 }

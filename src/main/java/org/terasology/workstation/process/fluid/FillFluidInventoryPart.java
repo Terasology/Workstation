@@ -14,11 +14,9 @@ import org.terasology.logic.inventory.action.RemoveItemAction;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
+import org.terasology.workstation.process.SpecificInputSlotComponent;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.process.inventory.ValidateInventoryItem;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -78,24 +76,20 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
     }
 
     @Override
-    public Set<String> validate(EntityRef instigator, EntityRef workstation) throws InvalidProcessException {
+    public boolean validate(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
 
         FluidInventoryComponent fluidInventory = workstation.getComponent(FluidInventoryComponent.class);
 
-        Set<String> result = new HashSet<>();
         for (int containerInputSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_INPUT")) {
             EntityRef containerItem = InventoryUtils.getItemAt(workstation, containerInputSlot);
             if (canEmptyContainerItem(workstation, entityManager, fluidInventory, containerItem)) {
-                result.add(String.valueOf(containerInputSlot));
+                processEntity.addComponent(new SpecificInputSlotComponent(containerInputSlot));
+                return true;
             }
         }
 
-        if (result.size() == 0) {
-            throw new InvalidProcessException();
-        }
-
-        return result;
+        throw new InvalidProcessException();
     }
 
     private boolean canEmptyContainerItem(EntityRef workstation, EntityManager entityManager, FluidInventoryComponent fluidInventory, EntityRef containerItem) {
@@ -130,16 +124,17 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
     }
 
     @Override
-    public long getDuration(EntityRef instigator, EntityRef workstation, String result) {
+    public long getDuration(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         return 0;
     }
 
     @Override
-    public void executeStart(EntityRef instigator, EntityRef workstation, String result) {
+    public void executeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         FluidManager fluidManager = CoreRegistry.get(FluidManager.class);
 
-        int slot = Integer.parseInt(result);
-        EntityRef containerItem = InventoryUtils.getItemAt(workstation, slot);
+        SpecificInputSlotComponent inputSlot = processEntity.getComponent(SpecificInputSlotComponent.class);
+
+        EntityRef containerItem = InventoryUtils.getItemAt(workstation, inputSlot.slot);
         FluidContainerItemComponent fluidContainer = containerItem.getComponent(FluidContainerItemComponent.class);
 
         for (int fluidSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_INPUT")) {
@@ -167,6 +162,6 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
     }
 
     @Override
-    public void executeEnd(EntityRef instigator, EntityRef workstation, String result) {
+    public void executeEnd(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
     }
 }

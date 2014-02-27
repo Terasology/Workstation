@@ -10,7 +10,6 @@ import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -41,7 +40,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     @Override
-    public Set<String> validate(EntityRef instigator, EntityRef workstation) throws InvalidProcessException {
+    public boolean validate(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
         for (Map.Entry<Predicate<EntityRef>, Integer> requiredItem : getInputItems().entrySet()) {
             Predicate<EntityRef> filter = requiredItem.getKey();
 
@@ -59,29 +58,30 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
             }
         }
 
-        return null;
+        return true;
     }
 
     @Override
-    public long getDuration(EntityRef instigator, EntityRef workstation, String result) {
+    public long getDuration(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         return 0;
     }
 
     @Override
-    public void executeStart(EntityRef instigator, EntityRef workstation, String result) {
+    public void executeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         for (Map.Entry<Predicate<EntityRef>, Integer> requiredItem : getInputItems().entrySet()) {
             removeItem(instigator, workstation, requiredItem.getKey(), requiredItem.getValue());
         }
     }
 
     private void removeItem(EntityRef instigator, EntityRef workstation, Predicate<EntityRef> filter, int toRemove) {
+        int remainingToRemove = toRemove;
         for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
             EntityRef item = InventoryUtils.getItemAt(workstation, slot);
             if (filter.apply(item)) {
-                int remove = Math.min(InventoryUtils.getStackCount(item), toRemove);
+                int remove = Math.min(InventoryUtils.getStackCount(item), remainingToRemove);
                 workstation.send(new RemoveItemAction(instigator, item, true, remove));
-                toRemove -= remove;
-                if (toRemove == 0) {
+                remainingToRemove -= remove;
+                if (remainingToRemove == 0) {
                     return;
                 }
             }
@@ -89,6 +89,6 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     @Override
-    public void executeEnd(EntityRef instigator, EntityRef workstation, String result) {
+    public void executeEnd(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
     }
 }
