@@ -84,32 +84,10 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     }
 
     private void addItemToInventory(EntityRef instigator, EntityRef workstation, EntityRef outputItem) {
-        // First try to merge into existing slots
-        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT")) {
-            EntityRef item = InventoryUtils.getItemAt(workstation, slot);
-            if (item.exists()) {
-                if (InventoryUtils.canStackInto(outputItem, item)) {
-                    GiveItemAction event = new GiveItemAction(instigator, outputItem, slot);
-                    workstation.send(event);
-                    if (!event.isConsumed()) {
-                        outputItem.destroy();
-                    }
-                    return;
-                }
-            }
-        }
-
-        // Then fill out empty slots
-        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT")) {
-            EntityRef item = InventoryUtils.getItemAt(workstation, slot);
-            if (!item.exists()) {
-                GiveItemAction event = new GiveItemAction(instigator, outputItem, slot);
-                workstation.send(event);
-                if (!event.isConsumed()) {
-                    outputItem.destroy();
-                }
-                return;
-            }
+        GiveItemAction event = new GiveItemAction(instigator, outputItem, WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT"));
+        workstation.send(event);
+        if (!event.isConsumed()) {
+            outputItem.destroy();
         }
     }
 }

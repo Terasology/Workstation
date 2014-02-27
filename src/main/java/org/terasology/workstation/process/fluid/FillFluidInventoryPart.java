@@ -156,12 +156,10 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
             fluidContainerRemoved.fluidType = null;
             removedItem.saveComponent(fluidContainerRemoved);
 
-            for (int containerOutputSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_OUTPUT")) {
-                GiveItemAction give = new GiveItemAction(instigator, removedItem, containerOutputSlot);
-                workstation.send(give);
-                if (give.isConsumed()) {
-                    return;
-                }
+            GiveItemAction give = new GiveItemAction(instigator, removedItem, WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_OUTPUT"));
+            workstation.send(give);
+            if (give.isConsumed()) {
+                return;
             }
 
             removedItem.destroy();
