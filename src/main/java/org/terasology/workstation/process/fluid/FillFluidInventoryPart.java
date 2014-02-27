@@ -8,6 +8,7 @@ import org.terasology.fluid.component.FluidContainerItemComponent;
 import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.fluid.event.BeforeFluidPutInInventory;
 import org.terasology.fluid.system.FluidManager;
+import org.terasology.fluid.system.FluidUtils;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.logic.inventory.action.GiveItemAction;
 import org.terasology.logic.inventory.action.RemoveItemAction;
@@ -146,9 +147,8 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
         workstation.send(remove);
         if (remove.isConsumed()) {
             EntityRef removedItem = remove.getRemovedItem();
-            FluidContainerItemComponent fluidContainerRemoved = removedItem.getComponent(FluidContainerItemComponent.class);
-            fluidContainerRemoved.fluidType = null;
-            removedItem.saveComponent(fluidContainerRemoved);
+
+            FluidUtils.setFluidForContainerItem(removedItem, null);
 
             GiveItemAction give = new GiveItemAction(instigator, removedItem, WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_OUTPUT"));
             workstation.send(give);
