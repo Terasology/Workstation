@@ -12,9 +12,8 @@ import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.logic.inventory.action.GiveItemAction;
 import org.terasology.logic.inventory.action.RemoveItemAction;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.workstation.process.InvalidProcessException;
+import org.terasology.workstation.component.SpecificInputSlotComponent;
 import org.terasology.workstation.process.ProcessPart;
-import org.terasology.workstation.process.SpecificInputSlotComponent;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.process.inventory.ValidateInventoryItem;
 
@@ -76,7 +75,7 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
     }
 
     @Override
-    public boolean validate(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
+    public boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
 
         FluidInventoryComponent fluidInventory = workstation.getComponent(FluidInventoryComponent.class);
@@ -89,7 +88,7 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
             }
         }
 
-        throw new InvalidProcessException();
+        return false;
     }
 
     private boolean canEmptyContainerItem(EntityRef workstation, EntityManager entityManager, FluidInventoryComponent fluidInventory, EntityRef containerItem) {

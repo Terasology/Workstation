@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.workstation.process;
+package org.terasology.workstation.component;
 
 import org.terasology.entitySystem.Component;
 
-public class SpecificInputSlotComponent implements Component {
-    public int slot;
+/**
+ * @author Marcin Sciesinski <marcins78@gmail.com>
+ */
+public class OutputTypeComponent implements Component {
+    public String type;
 
-    public SpecificInputSlotComponent() {
+    public OutputTypeComponent() {
     }
 
-    public SpecificInputSlotComponent(int slot) {
-        this.slot = slot;
+    public OutputTypeComponent(String type) {
+        this.type = type;
     }
 }

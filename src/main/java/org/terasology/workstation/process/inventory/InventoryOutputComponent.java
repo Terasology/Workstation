@@ -4,7 +4,6 @@ import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.logic.inventory.action.GiveItemAction;
-import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 
@@ -33,7 +32,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     }
 
     @Override
-    public boolean validate(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
+    public boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         Set<EntityRef> outputItems = createOutputItems();
         try {
             Set<EntityRef> itemsLeftToAssign = new HashSet<>(outputItems);
@@ -54,7 +53,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
             }
 
             if (emptySlots < itemsLeftToAssign.size()) {
-                throw new InvalidProcessException();
+                return false;
             }
         } finally {
             for (EntityRef outputItem : outputItems) {

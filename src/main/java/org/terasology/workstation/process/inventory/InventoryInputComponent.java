@@ -5,7 +5,6 @@ import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.logic.inventory.action.RemoveItemAction;
-import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 
@@ -40,7 +39,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     @Override
-    public boolean validate(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
+    public boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         for (Map.Entry<Predicate<EntityRef>, Integer> requiredItem : getInputItems().entrySet()) {
             Predicate<EntityRef> filter = requiredItem.getKey();
 
@@ -54,7 +53,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
             }
 
             if (requiredItem.getValue() > foundCount) {
-                throw new InvalidProcessException();
+                return false;
             }
         }
 

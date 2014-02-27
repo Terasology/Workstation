@@ -19,14 +19,14 @@ import org.terasology.entitySystem.entity.EntityRef;
 
 public interface ProcessPart {
     /**
-     * Validates if this process can be executed, if not InvalidProcessException should be thrown.
+     * Validates if this process can be executed.
      *
      * @param instigator
      * @param workstation
      * @return
      * @throws InvalidProcessException
      */
-    public boolean validate(EntityRef instigator, EntityRef workstation, EntityRef readonlyProcessEntity) throws InvalidProcessException;
+    public boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
 
     /**
      * Returns duration for this process. All the ProcessParts are queried, and the sum of all results becomes

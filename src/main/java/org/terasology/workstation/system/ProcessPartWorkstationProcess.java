@@ -125,7 +125,7 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     private long startProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
         for (ProcessPart processPart : processParts) {
-            if(!processPart.validate(instigator, workstation, processEntity)) {
+            if (!processPart.validateBeforeStart(instigator, workstation, processEntity)) {
                 throw new InvalidProcessException();
             }
         }
