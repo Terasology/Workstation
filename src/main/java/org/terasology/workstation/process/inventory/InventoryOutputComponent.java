@@ -2,8 +2,9 @@ package org.terasology.workstation.process.inventory;
 
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
-import org.terasology.logic.inventory.action.GiveItemAction;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 
@@ -83,9 +84,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     }
 
     private void addItemToInventory(EntityRef instigator, EntityRef workstation, EntityRef outputItem) {
-        GiveItemAction event = new GiveItemAction(instigator, outputItem, WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT"));
-        workstation.send(event);
-        if (!event.isConsumed()) {
+        if (!CoreRegistry.get(InventoryManager.class).giveItem(workstation, instigator, outputItem, WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT"))) {
             outputItem.destroy();
         }
     }

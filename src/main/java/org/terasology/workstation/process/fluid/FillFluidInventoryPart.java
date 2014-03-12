@@ -9,9 +9,8 @@ import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.fluid.event.BeforeFluidPutInInventory;
 import org.terasology.fluid.system.FluidManager;
 import org.terasology.fluid.system.FluidUtils;
+import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
-import org.terasology.logic.inventory.action.GiveItemAction;
-import org.terasology.logic.inventory.action.RemoveItemAction;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.workstation.component.SpecificInputSlotComponent;
 import org.terasology.workstation.process.ProcessPart;
@@ -143,16 +142,11 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
             }
         }
 
-        RemoveItemAction remove = new RemoveItemAction(instigator, containerItem, false, 1);
-        workstation.send(remove);
-        if (remove.isConsumed()) {
-            EntityRef removedItem = remove.getRemovedItem();
-
+        final EntityRef removedItem = CoreRegistry.get(InventoryManager.class).removeItem(workstation, instigator, containerItem, false, 1);
+        if (removedItem != null) {
             FluidUtils.setFluidForContainerItem(removedItem, null);
 
-            GiveItemAction give = new GiveItemAction(instigator, removedItem, WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_OUTPUT"));
-            workstation.send(give);
-            if (give.isConsumed()) {
+            if (CoreRegistry.get(InventoryManager.class).giveItem(workstation, instigator, removedItem, WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_OUTPUT"))) {
                 return;
             }
 

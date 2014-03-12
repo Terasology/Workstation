@@ -3,8 +3,9 @@ package org.terasology.workstation.process.inventory;
 import com.google.common.base.Predicate;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
-import org.terasology.logic.inventory.action.RemoveItemAction;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 
@@ -78,10 +79,11 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
             EntityRef item = InventoryUtils.getItemAt(workstation, slot);
             if (filter.apply(item)) {
                 int remove = Math.min(InventoryUtils.getStackCount(item), remainingToRemove);
-                workstation.send(new RemoveItemAction(instigator, item, true, remove));
-                remainingToRemove -= remove;
-                if (remainingToRemove == 0) {
-                    return;
+                if (CoreRegistry.get(InventoryManager.class).removeItem(workstation, instigator, item, true, remove) != null) {
+                    remainingToRemove -= remove;
+                    if (remainingToRemove == 0) {
+                        return;
+                    }
                 }
             }
         }
