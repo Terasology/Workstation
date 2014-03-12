@@ -2,9 +2,7 @@ package org.terasology.workstation.system;
 
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.delay.AddDelayedActionEvent;
-import org.terasology.logic.delay.CancelDelayedActionEvent;
-import org.terasology.logic.delay.HasDelayedActionEvent;
+import org.terasology.logic.delay.DelayManager;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
@@ -114,13 +112,12 @@ public final class WorkstationUtils {
             for (WorkstationProcessingComponent.ProcessDef processDef : workstationProcessing.processes.values()) {
                 minEndTime = Math.min(minEndTime, processDef.processingFinishTime);
             }
+            final DelayManager delayManager = CoreRegistry.get(DelayManager.class);
 
-            HasDelayedActionEvent getDelayed = new HasDelayedActionEvent(WORKSTATION_PROCESSING);
-            workstation.send(getDelayed);
-            if (getDelayed.hasAction()) {
-                workstation.send(new CancelDelayedActionEvent(WORKSTATION_PROCESSING));
+            if (delayManager.hasDelayedAction(workstation, WORKSTATION_PROCESSING)) {
+                delayManager.cancelDelayedAction(workstation, WORKSTATION_PROCESSING);
             }
-            workstation.send(new AddDelayedActionEvent(WORKSTATION_PROCESSING, minEndTime - currentTime));
+            delayManager.addDelayedAction(workstation, WORKSTATION_PROCESSING, minEndTime - currentTime);
         }
     }
 }
