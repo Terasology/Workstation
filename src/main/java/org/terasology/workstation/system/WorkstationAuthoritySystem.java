@@ -94,8 +94,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
                     }
                 }
 
-                WorkstationUtils.scheduleWorkstationWakeUpIfNecessary(workstation, time.getGameTimeInMs());
-
+                pendingWorkstationChecks.add(workstation);
                 processPendingChecks();
             }
         } finally {
