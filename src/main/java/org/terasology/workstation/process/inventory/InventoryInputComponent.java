@@ -6,6 +6,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.registry.CoreRegistry;
+import org.terasology.workstation.process.DescribeProcess;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem {
+public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess {
     protected abstract Map<Predicate<EntityRef>, Integer> getInputItems();
 
     @Override
@@ -45,17 +46,22 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
             Predicate<EntityRef> filter = requiredItem.getKey();
 
             int foundCount = 0;
+            boolean foundItem = false;
 
             for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
                 EntityRef item = InventoryUtils.getItemAt(workstation, slot);
                 if (filter.apply(item)) {
+                    foundItem = true;
                     foundCount += InventoryUtils.getStackCount(item);
                 }
             }
 
-            if (requiredItem.getValue() > foundCount) {
+            if (foundItem) {
+                return requiredItem.getValue() <= foundCount;
+            } else {
                 return false;
             }
+
         }
 
         return true;
@@ -91,5 +97,15 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
 
     @Override
     public void executeEnd(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
+    }
+
+    @Override
+    public String getDescription() {
+        return null;
+    }
+
+    @Override
+    public int getComplexity() {
+        return 0;
     }
 }

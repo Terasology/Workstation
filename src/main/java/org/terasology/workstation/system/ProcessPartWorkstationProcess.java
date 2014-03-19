@@ -15,21 +15,26 @@
  */
 package org.terasology.workstation.system;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
+import org.terasology.workstation.process.DescribeProcess;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
+import org.terasology.workstation.process.ValidateProcess;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 import org.terasology.workstation.process.inventory.ValidateInventoryItem;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
-public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem {
+public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
     private String id;
     private String processType;
     private List<ProcessPart> processParts = new LinkedList<>();
@@ -72,6 +77,16 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         }
 
         return false;
+    }
+
+    @Override
+    public boolean isValid(EntityRef instigator, EntityRef workstation) {
+        for (ProcessPart part : processParts) {
+            if (!part.validateBeforeStart(instigator, workstation, EntityRef.NULL)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -147,5 +162,30 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         for (ProcessPart processPart : processParts) {
             processPart.executeEnd(instigator, workstation, processEntity);
         }
+    }
+
+    @Override
+    public String getDescription() {
+        Set<String> descriptions = Sets.newHashSet();
+        for (ProcessPart part : processParts) {
+            if (part instanceof DescribeProcess) {
+                String description = ((DescribeProcess) part).getDescription();
+                if (description != null) {
+                    descriptions.add(description);
+                }
+            }
+        }
+        return Joiner.on(" ").join(descriptions);
+    }
+
+    @Override
+    public int getComplexity() {
+        int complexity = 0;
+        for (ProcessPart part : processParts) {
+            if (part instanceof DescribeProcess) {
+                complexity += ((DescribeProcess) part).getComplexity();
+            }
+        }
+        return complexity;
     }
 }

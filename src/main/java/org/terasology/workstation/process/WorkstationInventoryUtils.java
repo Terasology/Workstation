@@ -32,7 +32,7 @@ public final class WorkstationInventoryUtils {
     public static List<Integer> getAssignedSlots(EntityRef workstation, String type) {
         WorkstationInventoryComponent inventory = workstation.getComponent(WorkstationInventoryComponent.class);
         List<Integer> result = new LinkedList<>();
-        if( inventory != null ) {
+        if (inventory != null) {
             WorkstationInventoryComponent.SlotAssignment slotAssignment = inventory.slotAssignments.get(type);
             for (int i = 0; i < slotAssignment.slotCount; i++) {
                 result.add(slotAssignment.slotStart + i);
