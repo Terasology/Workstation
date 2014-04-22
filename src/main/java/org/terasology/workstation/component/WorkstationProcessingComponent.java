@@ -23,15 +23,19 @@ import org.terasology.reflection.MappedContainer;
 import java.util.HashMap;
 import java.util.Map;
 
-@Replicate
 public class WorkstationProcessingComponent implements Component {
+    @Replicate
     public Map<String, ProcessDef> processes = new HashMap<>();
 
     @MappedContainer
     public static class ProcessDef {
+        @Replicate
         public String processingProcessId;
+        @Replicate
         public EntityRef processEntity;
+        @Replicate
         public long processingStartTime;
+        @Replicate
         public long processingFinishTime;
     }
 }

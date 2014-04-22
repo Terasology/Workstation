@@ -22,8 +22,9 @@ import org.terasology.world.block.ForceBlockActive;
 import java.util.Map;
 
 @ForceBlockActive
-@Replicate
 public class WorkstationComponent implements Component {
+    @Replicate
     public String uiPrefab;
+    @Replicate
     public Map<String, Boolean> supportedProcessTypes;
 }
