@@ -98,7 +98,7 @@ public class FillFluidInventoryPart implements Component, ProcessPart, ValidateI
                 FluidComponent fluid = fluidInventory.fluidSlots.get(fluidSlot).getComponent(FluidComponent.class);
                 Float maximumVolume = fluidInventory.maximumVolumes.get(fluidSlot);
                 if (canStoreContentsOfContainerInFluidSlot(fluidContainer, fluid, maximumVolume)) {
-                    EntityRef tempEntity = entityManager.copy(containerItem);
+                    EntityRef tempEntity = containerItem.copy();
                     try {
                         FluidContainerItemComponent fluidContainerCopy = tempEntity.getComponent(FluidContainerItemComponent.class);
                         fluidContainerCopy.fluidType = null;
