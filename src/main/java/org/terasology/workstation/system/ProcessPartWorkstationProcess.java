@@ -165,17 +165,31 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     @Override
-    public String getDescription() {
+    public String getOutputDescription() {
         Set<String> descriptions = Sets.newHashSet();
         for (ProcessPart part : processParts) {
             if (part instanceof DescribeProcess) {
-                String description = ((DescribeProcess) part).getDescription();
+                String description = ((DescribeProcess) part).getOutputDescription();
                 if (description != null) {
                     descriptions.add(description);
                 }
             }
         }
-        return Joiner.on(" ").join(descriptions);
+        return Joiner.on(", ").join(descriptions);
+    }
+
+    @Override
+    public String getInputDescription() {
+        Set<String> descriptions = Sets.newHashSet();
+        for (ProcessPart part : processParts) {
+            if (part instanceof DescribeProcess) {
+                String description = ((DescribeProcess) part).getInputDescription();
+                if (description != null) {
+                    descriptions.add(description);
+                }
+            }
+        }
+        return Joiner.on(" + ").join(descriptions);
     }
 
     @Override

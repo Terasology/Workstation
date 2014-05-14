@@ -94,7 +94,12 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     }
 
     @Override
-    public String getDescription() {
+    public String getInputDescription() {
+        return null;
+    }
+
+    @Override
+    public String getOutputDescription() {
         Set<EntityRef> items = createOutputItems();
         Set<String> descriptions = Sets.newHashSet();
         try {
@@ -108,7 +113,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
             }
         }
 
-        return Joiner.on(" and ").join(descriptions);
+        return Joiner.on(", ").join(descriptions);
     }
 
     @Override

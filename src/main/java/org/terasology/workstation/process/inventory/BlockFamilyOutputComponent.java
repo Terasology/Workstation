@@ -19,6 +19,10 @@ public class BlockFamilyOutputComponent extends InventoryOutputComponent {
 
     @Override
     protected Set<EntityRef> createOutputItems() {
+        return createOutputItems(blockCounts);
+    }
+
+    public static Set<EntityRef> createOutputItems(Map<String, Integer> blockCounts) {
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
 

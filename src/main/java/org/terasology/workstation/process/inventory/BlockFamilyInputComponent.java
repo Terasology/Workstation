@@ -7,6 +7,7 @@ import org.terasology.world.block.items.BlockItemComponent;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -24,7 +25,12 @@ public class BlockFamilyInputComponent extends InventoryInputComponent {
         return result;
     }
 
-    private final static class BlockFamilyPredicate implements Predicate<EntityRef> {
+    @Override
+    protected Set<EntityRef> createItems() {
+        return BlockFamilyOutputComponent.createOutputItems(blockCounts);
+    }
+
+    private static final class BlockFamilyPredicate implements Predicate<EntityRef> {
         private BlockUri blockFamilyUri;
 
         private BlockFamilyPredicate(BlockUri blockFamilyUri) {

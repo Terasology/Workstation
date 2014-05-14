@@ -17,6 +17,10 @@ public class ItemPrefabOutputComponent extends InventoryOutputComponent {
 
     @Override
     protected Set<EntityRef> createOutputItems() {
+        return createOutputItems(itemCounts);
+    }
+
+    public static Set<EntityRef> createOutputItems(Map<String, Integer> itemCounts) {
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
 
         Set<EntityRef> result = new HashSet<>();

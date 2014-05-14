@@ -8,6 +8,7 @@ import org.terasology.logic.inventory.ItemComponent;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
@@ -23,6 +24,11 @@ public class ItemPrefabInputComponent extends InventoryInputComponent {
         }
 
         return result;
+    }
+
+    @Override
+    protected Set<EntityRef> createItems() {
+        return ItemPrefabOutputComponent.createOutputItems(itemCounts);
     }
 
     private static final class ItemPrefabPredicate implements Predicate<EntityRef> {

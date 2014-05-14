@@ -16,7 +16,9 @@
 package org.terasology.workstation.process;
 
 public interface DescribeProcess {
-    String getDescription();
+    String getOutputDescription();
+
+    String getInputDescription();
 
     int getComplexity();
 }
