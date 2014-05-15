@@ -9,9 +9,12 @@ import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.registry.CoreRegistry;
+import org.terasology.rendering.nui.layouts.FlowLayout;
 import org.terasology.workstation.process.DescribeProcess;
 import org.terasology.workstation.process.ProcessPart;
+import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
+import org.terasology.workstation.ui.InventoryItem;
 
 import java.util.Map;
 import java.util.Set;
@@ -106,13 +109,15 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     @Override
-    public String getInputDescription() {
+    public ProcessPartDescription getInputDescription() {
         Set<EntityRef> items = createItems();
         Set<String> descriptions = Sets.newHashSet();
+        FlowLayout flowLayout = new FlowLayout();
         try {
             for (EntityRef item : items) {
                 int stackCount = InventoryUtils.getStackCount(item);
                 descriptions.add(stackCount + " " + item.getComponent(DisplayNameComponent.class).name);
+                flowLayout.addWidget(new InventoryItem(item), null);
             }
         } finally {
             for (EntityRef outputItem : items) {
@@ -120,11 +125,11 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
             }
         }
 
-        return Joiner.on(", ").join(descriptions);
+        return new ProcessPartDescription(Joiner.on(", ").join(descriptions), flowLayout);
     }
 
     @Override
-    public String getOutputDescription() {
+    public ProcessPartDescription getOutputDescription() {
         return null;
     }
 

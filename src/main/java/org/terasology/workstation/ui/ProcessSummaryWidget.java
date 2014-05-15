@@ -18,34 +18,49 @@ package org.terasology.workstation.ui;
 import org.terasology.math.Vector2i;
 import org.terasology.rendering.nui.Canvas;
 import org.terasology.rendering.nui.CoreWidget;
+import org.terasology.rendering.nui.UIWidget;
+import org.terasology.rendering.nui.layouts.FlowLayout;
 import org.terasology.rendering.nui.widgets.UILabel;
 import org.terasology.workstation.process.DescribeProcess;
+import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.WorkstationProcess;
 
 /**
  * Displays the input and output of a process
  */
 public class ProcessSummaryWidget extends CoreWidget {
-    UILabel description;
+    UIWidget widget;
 
     public ProcessSummaryWidget(WorkstationProcess process) {
-        description = new UILabel();
+        FlowLayout flowLayout = new FlowLayout();
         if (process instanceof DescribeProcess) {
             DescribeProcess describeProcess = (DescribeProcess) process;
-            description.setText(describeProcess.getInputDescription() + " = " + describeProcess.getOutputDescription());
+            ProcessPartDescription inputDesc = describeProcess.getInputDescription();
+            flowLayout.addWidget(inputDesc.getWidget(), null);
+
+            UILabel eqLabel = new UILabel();
+            eqLabel.setText("=");
+            flowLayout.addWidget(eqLabel, null);
+
+            ProcessPartDescription outputDesc = describeProcess.getOutputDescription();
+            flowLayout.addWidget(outputDesc.getWidget(), null);
+
+            widget = flowLayout;
         } else {
-            description.setText(process.getId() + " cannot be displayed");
+            UILabel errorLabel = new UILabel();
+            errorLabel.setText(process.getId() + " cannot be displayed");
+            widget = errorLabel;
         }
     }
 
 
     @Override
     public void onDraw(Canvas canvas) {
-        description.onDraw(canvas);
+        widget.onDraw(canvas);
     }
 
     @Override
     public Vector2i getPreferredContentSize(Canvas canvas, Vector2i sizeHint) {
-        return description.getPreferredContentSize(canvas, sizeHint);
+        return widget.getPreferredContentSize(canvas, sizeHint);
     }
 }

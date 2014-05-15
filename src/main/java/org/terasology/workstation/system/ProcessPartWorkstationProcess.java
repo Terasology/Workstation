@@ -20,11 +20,14 @@ import com.google.common.collect.Sets;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.rendering.nui.layouts.FlowLayout;
+import org.terasology.rendering.nui.widgets.UILabel;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.DescribeProcess;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.ProcessPart;
+import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ValidateProcess;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
@@ -165,31 +168,38 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     @Override
-    public String getOutputDescription() {
+    public ProcessPartDescription getOutputDescription() {
+        FlowLayout flowLayout = new FlowLayout();
         Set<String> descriptions = Sets.newHashSet();
         for (ProcessPart part : processParts) {
             if (part instanceof DescribeProcess) {
-                String description = ((DescribeProcess) part).getOutputDescription();
+                ProcessPartDescription description = ((DescribeProcess) part).getOutputDescription();
                 if (description != null) {
-                    descriptions.add(description);
+                    descriptions.add(description.toString());
+                    flowLayout.addWidget(description.getWidget(), null);
                 }
             }
         }
-        return Joiner.on(", ").join(descriptions);
+        return new ProcessPartDescription(Joiner.on(", ").join(descriptions), flowLayout);
     }
 
     @Override
-    public String getInputDescription() {
+    public ProcessPartDescription getInputDescription() {
+        UILabel seperatorWidget = new UILabel();
+        seperatorWidget.setText("+");
+        FlowLayout flowLayout = new FlowLayout();
         Set<String> descriptions = Sets.newHashSet();
         for (ProcessPart part : processParts) {
             if (part instanceof DescribeProcess) {
-                String description = ((DescribeProcess) part).getInputDescription();
+                ProcessPartDescription description = ((DescribeProcess) part).getInputDescription();
                 if (description != null) {
-                    descriptions.add(description);
+                    descriptions.add(description.toString());
+                    flowLayout.addWidget(description.getWidget(), null);
+                    flowLayout.addWidget(seperatorWidget, null);
                 }
             }
         }
-        return Joiner.on(" + ").join(descriptions);
+        return new ProcessPartDescription(Joiner.on(" + ").join(descriptions), flowLayout);
     }
 
     @Override
