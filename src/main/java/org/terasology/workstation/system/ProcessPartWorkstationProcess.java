@@ -17,11 +17,12 @@ package org.terasology.workstation.system;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
+import org.terasology.asset.Assets;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.rendering.nui.layouts.FlowLayout;
-import org.terasology.rendering.nui.widgets.UILabel;
+import org.terasology.rendering.nui.widgets.UIImage;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.DescribeProcess;
@@ -185,17 +186,20 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public ProcessPartDescription getInputDescription() {
-        UILabel seperatorWidget = new UILabel();
-        seperatorWidget.setText("+");
+        UIImage plus = new UIImage();
+        plus.setImage(Assets.getTextureRegion("workstation:plus"));
         FlowLayout flowLayout = new FlowLayout();
         Set<String> descriptions = Sets.newHashSet();
+        boolean isFirst = true;
         for (ProcessPart part : processParts) {
             if (part instanceof DescribeProcess) {
                 ProcessPartDescription description = ((DescribeProcess) part).getInputDescription();
                 if (description != null) {
+                    if (!isFirst)
+                        flowLayout.addWidget(plus, null);
+                    isFirst = false;
                     descriptions.add(description.toString());
                     flowLayout.addWidget(description.getWidget(), null);
-                    flowLayout.addWidget(seperatorWidget, null);
                 }
             }
         }

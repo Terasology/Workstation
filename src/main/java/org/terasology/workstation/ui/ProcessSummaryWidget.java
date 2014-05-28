@@ -15,11 +15,13 @@
  */
 package org.terasology.workstation.ui;
 
+import org.terasology.asset.Assets;
 import org.terasology.math.Vector2i;
 import org.terasology.rendering.nui.Canvas;
 import org.terasology.rendering.nui.CoreWidget;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.layouts.FlowLayout;
+import org.terasology.rendering.nui.widgets.UIImage;
 import org.terasology.rendering.nui.widgets.UILabel;
 import org.terasology.workstation.process.DescribeProcess;
 import org.terasology.workstation.process.ProcessPartDescription;
@@ -38,9 +40,9 @@ public class ProcessSummaryWidget extends CoreWidget {
             ProcessPartDescription inputDesc = describeProcess.getInputDescription();
             flowLayout.addWidget(inputDesc.getWidget(), null);
 
-            UILabel eqLabel = new UILabel();
-            eqLabel.setText("=");
-            flowLayout.addWidget(eqLabel, null);
+            UIImage eq = new UIImage();
+            eq.setImage(Assets.getTextureRegion("workstation:equals"));
+            flowLayout.addWidget(eq, null);
 
             ProcessPartDescription outputDesc = describeProcess.getOutputDescription();
             flowLayout.addWidget(outputDesc.getWidget(), null);
