@@ -26,7 +26,9 @@ import org.terasology.rendering.nui.widgets.UIImage;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.DescribeProcess;
+import org.terasology.workstation.process.ErrorCheckingProcessPart;
 import org.terasology.workstation.process.InvalidProcessException;
+import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ValidateProcess;
@@ -43,10 +45,14 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     private String processType;
     private List<ProcessPart> processParts = new LinkedList<>();
 
-    public ProcessPartWorkstationProcess(Prefab prefab) {
+    ProcessPartWorkstationProcess(Prefab prefab) throws InvalidProcessPartException {
         id = "Prefab:" + prefab.getURI().toSimpleString();
         for (Component component : prefab.iterateComponents()) {
             if (component instanceof ProcessPart) {
+                if (component instanceof ErrorCheckingProcessPart) {
+                    ErrorCheckingProcessPart errorChecking = (ErrorCheckingProcessPart) component;
+                    errorChecking.checkForErrors();
+                }
                 processParts.add((ProcessPart) component);
             } else if (component instanceof ProcessDefinitionComponent) {
                 processType = ((ProcessDefinitionComponent) component).processType;
@@ -133,12 +139,14 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     @Override
-    public long startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcessRequest request, EntityRef processEntity) throws InvalidProcessException {
+    public long startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcessRequest
+            request, EntityRef processEntity) throws InvalidProcessException {
         return startProcessing(instigator, workstation, processEntity);
     }
 
     @Override
-    public long startProcessingAutomatic(EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
+    public long startProcessingAutomatic(EntityRef workstation, EntityRef processEntity) throws
+            InvalidProcessException {
         return startProcessing(workstation, workstation, processEntity);
     }
 

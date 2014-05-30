@@ -15,15 +15,25 @@
  */
 package org.terasology.workstation.system;
 
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.WorkstationProcess;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class DefaultWorkstationProcessFactory implements WorkstationProcessFactory {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(DefaultWorkstationProcessFactory.class);
+
     @Override
     public WorkstationProcess createProcess(Prefab prefab) {
-        return new ProcessPartWorkstationProcess(prefab);
+        try {
+            WorkstationProcess process = new ProcessPartWorkstationProcess(prefab);
+            return process;
+        } catch (InvalidProcessPartException ex) {
+            logger.warn("Invalid Process: " + prefab.getName() + ". " + ex.getMessage());
+            return null;
+        }
     }
 }

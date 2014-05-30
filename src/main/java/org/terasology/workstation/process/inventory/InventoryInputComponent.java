@@ -11,6 +11,8 @@ import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.nui.layouts.FlowLayout;
 import org.terasology.workstation.process.DescribeProcess;
+import org.terasology.workstation.process.ErrorCheckingProcessPart;
+import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
@@ -22,7 +24,7 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess {
+public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart {
     protected abstract Map<Predicate<EntityRef>, Integer> getInputItems();
 
     protected abstract Set<EntityRef> createItems();
@@ -136,5 +138,24 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     @Override
     public int getComplexity() {
         return 0;
+    }
+
+    @Override
+    public void checkForErrors() throws InvalidProcessPartException {
+        Set<EntityRef> items = null;
+        try {
+            items = createItems();
+            if (items.size() == 0) {
+                throw new InvalidProcessPartException("No input items specified");
+            }
+        } catch (Exception ex) {
+            throw new InvalidProcessPartException("Could not create input items");
+        } finally {
+            if (items != null) {
+                for (EntityRef outputItem : items) {
+                    outputItem.destroy();
+                }
+            }
+        }
     }
 }

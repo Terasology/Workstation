@@ -90,7 +90,9 @@ public class WorkstationRegistryImpl extends BaseComponentSystem implements Work
             ProcessDefinitionComponent processDef = prefab.getComponent(ProcessDefinitionComponent.class);
             if (processDef.processType.equals(processType)) {
                 WorkstationProcess process = factory.createProcess(prefab);
-                processes.put(process.getId(), process);
+                if (process != null) {
+                    processes.put(process.getId(), process);
+                }
             }
         }
         workstationProcesses.put(processType, processes);
