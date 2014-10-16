@@ -23,13 +23,11 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.common.ActivateEvent;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
-import org.terasology.workstation.event.OpenWorkstationRequest;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.event.WorkstationStateChanged;
 import org.terasology.workstation.process.WorkstationProcess;
@@ -57,11 +55,6 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
 
     // I would rather use LinkedHashSet, however cannot due to PojoEntityRef's hashcode changing when it is being destroyed.
     private Deque<EntityRef> pendingWorkstationChecks = new LinkedList<>();
-
-    @ReceiveEvent(components = {WorkstationComponent.class})
-    public void userActivatesWorkstation(ActivateEvent event, EntityRef entity) {
-        entity.send(new OpenWorkstationRequest());
-    }
 
     @ReceiveEvent
     public void machineAdded(OnAddedComponent event, EntityRef workstation, WorkstationComponent workstationComponent, BlockComponent block) {

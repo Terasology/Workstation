@@ -24,7 +24,5 @@ import java.util.Map;
 @ForceBlockActive
 public class WorkstationComponent implements Component {
     @Replicate
-    public String uiPrefab;
-    @Replicate
     public Map<String, Boolean> supportedProcessTypes;
 }
