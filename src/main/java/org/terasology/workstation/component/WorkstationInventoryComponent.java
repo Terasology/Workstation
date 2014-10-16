@@ -17,6 +17,7 @@ package org.terasology.workstation.component;
 
 import com.google.common.collect.Maps;
 import org.terasology.entitySystem.Component;
+import org.terasology.network.Replicate;
 import org.terasology.reflection.MappedContainer;
 import org.terasology.world.block.ForceBlockActive;
 
@@ -27,6 +28,7 @@ import java.util.Map;
  */
 @ForceBlockActive
 public class WorkstationInventoryComponent implements Component {
+    @Replicate
     public Map<String, SlotAssignment> slotAssignments = Maps.newHashMap();
 
     @MappedContainer

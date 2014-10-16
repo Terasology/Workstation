@@ -2,6 +2,8 @@ package org.terasology.workstation.process.inventory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.common.DisplayNameComponent;
@@ -24,6 +26,8 @@ import java.util.Set;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart {
+    private static final Logger logger = LoggerFactory.getLogger(InventoryOutputComponent.class);
+
     protected abstract Set<EntityRef> createOutputItems();
 
     @Override
@@ -111,8 +115,13 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
         try {
             for (EntityRef item : items) {
                 int stackCount = InventoryUtils.getStackCount(item);
-                descriptions.add(stackCount + " " + item.getComponent(DisplayNameComponent.class).name);
-                flowLayout.addWidget(new InventoryItem(item), null);
+                DisplayNameComponent displayNameComponent = item.getComponent(DisplayNameComponent.class);
+                if (displayNameComponent != null) {
+                    descriptions.add(stackCount + " " + item.getComponent(DisplayNameComponent.class).name);
+                    flowLayout.addWidget(new InventoryItem(item), null);
+                } else {
+                    logger.error(item.toString() + " DisplayNameComponent not found");
+                }
             }
         } finally {
             for (EntityRef outputItem : items) {

@@ -3,6 +3,8 @@ package org.terasology.workstation.process.inventory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.common.DisplayNameComponent;
@@ -25,6 +27,7 @@ import java.util.Set;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart {
+    private static final Logger logger = LoggerFactory.getLogger(InventoryInputComponent.class);
     protected abstract Map<Predicate<EntityRef>, Integer> getInputItems();
 
     protected abstract Set<EntityRef> createItems();
@@ -67,9 +70,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
                 }
             }
 
-            if (foundItem) {
-                return requiredItem.getValue() <= foundCount;
-            } else {
+            if (!foundItem || requiredItem.getValue() > foundCount) {
                 return false;
             }
 
@@ -118,8 +119,13 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
         try {
             for (EntityRef item : items) {
                 int stackCount = InventoryUtils.getStackCount(item);
-                descriptions.add(stackCount + " " + item.getComponent(DisplayNameComponent.class).name);
-                flowLayout.addWidget(new InventoryItem(item), null);
+                DisplayNameComponent displayNameComponent = item.getComponent(DisplayNameComponent.class);
+                if (displayNameComponent != null) {
+                    descriptions.add(stackCount + " " + displayNameComponent.name);
+                    flowLayout.addWidget(new InventoryItem(item), null);
+                } else {
+                    logger.error(item.toString() + " DisplayNameComponent not found");
+                }
             }
         } finally {
             for (EntityRef outputItem : items) {
