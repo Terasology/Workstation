@@ -47,4 +47,13 @@ public class ItemPrefabInputComponent extends InventoryInputComponent {
             return input.getParentPrefab().getURI().equals(prefab);
         }
     }
+
+    @Override
+    public int getComplexity() {
+        int total = 0;
+        for (Integer count : itemCounts.values()) {
+            total += count;
+        }
+        return total * itemCounts.size();
+    }
 }
