@@ -33,6 +33,9 @@ public class WorkstationInventoryComponent implements Component {
 
     @MappedContainer
     public static class SlotAssignment {
+        public int slotStart;
+        public int slotCount;
+
         public SlotAssignment() {
         }
 
@@ -40,8 +43,5 @@ public class WorkstationInventoryComponent implements Component {
             this.slotStart = slotStart;
             this.slotCount = slotCount;
         }
-
-        public int slotStart;
-        public int slotCount;
     }
 }

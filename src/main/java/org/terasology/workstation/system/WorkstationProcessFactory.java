@@ -22,5 +22,5 @@ import org.terasology.workstation.process.WorkstationProcess;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public interface WorkstationProcessFactory {
-    public WorkstationProcess createProcess(Prefab prefab);
+    WorkstationProcess createProcess(Prefab prefab);
 }

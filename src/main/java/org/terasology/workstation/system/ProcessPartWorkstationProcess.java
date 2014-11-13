@@ -203,8 +203,9 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
             if (part instanceof DescribeProcess) {
                 ProcessPartDescription description = ((DescribeProcess) part).getInputDescription();
                 if (description != null) {
-                    if (!isFirst)
+                    if (!isFirst) {
                         flowLayout.addWidget(plus, null);
+                    }
                     isFirst = false;
                     descriptions.add(description.toString());
                     flowLayout.addWidget(description.getWidget(), null);

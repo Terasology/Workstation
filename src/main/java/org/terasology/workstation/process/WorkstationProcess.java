@@ -19,13 +19,13 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 
 public interface WorkstationProcess {
-    public String getId();
+    String getId();
 
-    public String getProcessType();
+    String getProcessType();
 
-    public long startProcessingAutomatic(EntityRef workstation, EntityRef processEntity) throws InvalidProcessException;
+    long startProcessingAutomatic(EntityRef workstation, EntityRef processEntity) throws InvalidProcessException;
 
-    public long startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcessRequest request, EntityRef processEntity) throws InvalidProcessException;
+    long startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcessRequest request, EntityRef processEntity) throws InvalidProcessException;
 
-    public void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
+    void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
 }

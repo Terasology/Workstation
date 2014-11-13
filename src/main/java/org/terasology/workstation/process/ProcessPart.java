@@ -26,7 +26,7 @@ public interface ProcessPart {
      * @return
      * @throws InvalidProcessException
      */
-    public boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
+    boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
 
     /**
      * Returns duration for this process. All the ProcessParts are queried, and the sum of all results becomes
@@ -37,7 +37,7 @@ public interface ProcessPart {
      * @param processEntity
      * @return
      */
-    public long getDuration(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
+    long getDuration(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
 
     /**
      * Starts the execution of the process. In this step, for example, all the products, energy and other consumables
@@ -47,7 +47,7 @@ public interface ProcessPart {
      * @param workstation
      * @param processEntity
      */
-    public void executeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
+    void executeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
 
     /**
      * Finishes the execution of the process. In this step, for example, all the resulting blocks/items could be
@@ -57,5 +57,5 @@ public interface ProcessPart {
      * @param workstation
      * @param processEntity
      */
-    public void executeEnd(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
+    void executeEnd(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
 }
