@@ -16,6 +16,7 @@
 package org.terasology.workstation.system;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.terasology.asset.Assets;
 import org.terasology.entitySystem.Component;
@@ -151,27 +152,39 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     private long startProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
-        for (ProcessPart processPart : processParts) {
+        Iterable<ProcessPart> allProcessParts = getProcessParts();
+
+        for (ProcessPart processPart : allProcessParts) {
             if (!processPart.validateBeforeStart(instigator, workstation, processEntity)) {
                 throw new InvalidProcessException();
             }
         }
 
         long duration = 0;
-        for (ProcessPart processPart : processParts) {
+        for (ProcessPart processPart : allProcessParts) {
             duration += processPart.getDuration(instigator, workstation, processEntity);
         }
 
-        for (ProcessPart processPart : processParts) {
+        for (ProcessPart processPart : allProcessParts) {
             processPart.executeStart(instigator, workstation, processEntity);
         }
 
         return duration;
     }
 
+    private Iterable<ProcessPart> getProcessParts() {
+        Prefab processTypePrefab = Assets.getPrefab(processType);
+        if (processTypePrefab != null) {
+            return Iterables.concat(processParts, Iterables.filter(processTypePrefab.iterateComponents(), ProcessPart.class));
+        } else {
+            return processParts;
+        }
+    }
+
     @Override
     public void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
-        for (ProcessPart processPart : processParts) {
+        Iterable<ProcessPart> allProcessParts = getProcessParts();
+        for (ProcessPart processPart : allProcessParts) {
             processPart.executeEnd(instigator, workstation, processEntity);
         }
     }
@@ -180,7 +193,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     public ProcessPartDescription getOutputDescription() {
         FlowLayout flowLayout = new FlowLayout();
         Set<String> descriptions = Sets.newHashSet();
-        for (ProcessPart part : processParts) {
+        Iterable<ProcessPart> allProcessParts = getProcessParts();
+        for (ProcessPart part : allProcessParts) {
             if (part instanceof DescribeProcess) {
                 ProcessPartDescription description = ((DescribeProcess) part).getOutputDescription();
                 if (description != null) {
@@ -199,7 +213,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         FlowLayout flowLayout = new FlowLayout();
         Set<String> descriptions = Sets.newHashSet();
         boolean isFirst = true;
-        for (ProcessPart part : processParts) {
+        Iterable<ProcessPart> allProcessParts = getProcessParts();
+        for (ProcessPart part : allProcessParts) {
             if (part instanceof DescribeProcess) {
                 ProcessPartDescription description = ((DescribeProcess) part).getInputDescription();
                 if (description != null) {
@@ -217,7 +232,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     @Override
     public int getComplexity() {
         int complexity = 0;
-        for (ProcessPart part : processParts) {
+        Iterable<ProcessPart> allProcessParts = getProcessParts();
+        for (ProcessPart part : allProcessParts) {
             if (part instanceof DescribeProcess) {
                 complexity += ((DescribeProcess) part).getComplexity();
             }

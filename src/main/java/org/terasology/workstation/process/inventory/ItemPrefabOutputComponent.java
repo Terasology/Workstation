@@ -16,7 +16,7 @@ public class ItemPrefabOutputComponent extends InventoryOutputComponent {
     public Map<String, Integer> itemCounts;
 
     @Override
-    protected Set<EntityRef> createOutputItems() {
+    protected Set<EntityRef> createOutputItems(EntityRef processEntity) {
         return createOutputItems(itemCounts);
     }
 
