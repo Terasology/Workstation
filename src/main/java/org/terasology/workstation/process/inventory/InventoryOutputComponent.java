@@ -16,6 +16,7 @@ import org.terasology.workstation.process.ErrorCheckingProcessPart;
 import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
+import org.terasology.workstation.process.ProcessPartOrdering;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.ui.InventoryItem;
 
@@ -25,7 +26,7 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart {
+public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
     private static final Logger logger = LoggerFactory.getLogger(InventoryOutputComponent.class);
 
     protected abstract Set<EntityRef> createOutputItems(EntityRef processEntity);
@@ -155,5 +156,10 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
                 }
             }
         }
+    }
+
+    @Override
+    public int getSortOrder() {
+        return 1;
     }
 }

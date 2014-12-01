@@ -12,6 +12,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
+import org.terasology.logic.inventory.ItemComponent;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.nui.layouts.FlowLayout;
 import org.terasology.workstation.process.DescribeProcess;
@@ -19,6 +20,7 @@ import org.terasology.workstation.process.ErrorCheckingProcessPart;
 import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
+import org.terasology.workstation.process.ProcessPartOrdering;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.ui.InventoryItem;
 
@@ -29,7 +31,7 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart {
+public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
     private static final Logger logger = LoggerFactory.getLogger(InventoryInputComponent.class);
 
     protected abstract Map<Predicate<EntityRef>, Integer> getInputItems();
@@ -60,9 +62,12 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
 
     @Override
     public boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
+        final List<EntityRef> itemCopies = Lists.newArrayList();
+
         for (Map.Entry<Predicate<EntityRef>, Integer> requiredItem : getInputItems().entrySet()) {
             Predicate<EntityRef> filter = requiredItem.getKey();
 
+            int remainingToFind = requiredItem.getValue();
             int foundCount = 0;
             boolean foundItem = false;
 
@@ -70,7 +75,14 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
                 EntityRef item = InventoryUtils.getItemAt(workstation, slot);
                 if (filter.apply(item)) {
                     foundItem = true;
-                    foundCount += InventoryUtils.getStackCount(item);
+
+                    EntityRef itemCopy = item.copy();
+                    ItemComponent itemComponent = itemCopy.getComponent(ItemComponent.class);
+                    itemComponent.stackCount = (byte) Math.min(remainingToFind, itemComponent.stackCount);
+                    itemCopy.saveComponent(itemComponent);
+                    itemCopies.add(itemCopy);
+
+                    foundCount += itemComponent.stackCount;
                 }
             }
 
@@ -78,6 +90,14 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
                 return false;
             }
 
+        }
+
+        InventoryInputProcessPartItemsComponent inputItemsComponent = processEntity.getComponent(InventoryInputProcessPartItemsComponent.class);
+        if (inputItemsComponent == null) {
+            processEntity.addComponent(new InventoryInputProcessPartItemsComponent(itemCopies));
+        } else {
+            inputItemsComponent.items.addAll(itemCopies);
+            processEntity.saveComponent(inputItemsComponent);
         }
 
         return true;
@@ -98,36 +118,35 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     private void removeItem(EntityRef instigator, EntityRef workstation, Predicate<EntityRef> filter, int toRemove, EntityRef processEntity) {
         int remainingToRemove = toRemove;
 
-        InventoryInputProcessPartItemsComponent inputItemsComponent = processEntity.getComponent(InventoryInputProcessPartItemsComponent.class);
-        if (inputItemsComponent == null) {
-            inputItemsComponent = new InventoryInputProcessPartItemsComponent();
-        }
-
         for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
             EntityRef item = InventoryUtils.getItemAt(workstation, slot);
             if (filter.apply(item)) {
                 int remove = Math.min(InventoryUtils.getStackCount(item), remainingToRemove);
                 EntityRef removedItem = CoreRegistry.get(InventoryManager.class).removeItem(workstation, instigator, item, false, remove);
-                if (removedItem != null) {
-                    inputItemsComponent.items.add(removedItem);
+                if (removedItem != null)
                     remainingToRemove -= remove;
-                    if (remainingToRemove == 0) {
-                        break;
-                    }
+                if (remainingToRemove == 0) {
+                    break;
                 }
             }
         }
+    }
 
-        if (processEntity.hasComponent(InventoryInputProcessPartItemsComponent.class)) {
-            processEntity.saveComponent(inputItemsComponent);
-        } else {
-            processEntity.addComponent(inputItemsComponent);
-        }
+    @Override
+    public int getSortOrder() {
+        return -1;
     }
 
     public static class InventoryInputProcessPartItemsComponent implements Component {
         @Owns
         public List<EntityRef> items = Lists.newArrayList();
+
+        public InventoryInputProcessPartItemsComponent() {
+        }
+
+        public InventoryInputProcessPartItemsComponent(List<EntityRef> items) {
+            this.items = items;
+        }
     }
 
     @Override
