@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.Owns;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryManager;
@@ -135,18 +134,6 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     @Override
     public int getSortOrder() {
         return -1;
-    }
-
-    public static class InventoryInputProcessPartItemsComponent implements Component {
-        @Owns
-        public List<EntityRef> items = Lists.newArrayList();
-
-        public InventoryInputProcessPartItemsComponent() {
-        }
-
-        public InventoryInputProcessPartItemsComponent(List<EntityRef> items) {
-            this.items = items;
-        }
     }
 
     @Override
