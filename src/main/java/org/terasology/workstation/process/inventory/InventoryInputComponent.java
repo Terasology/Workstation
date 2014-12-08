@@ -67,7 +67,6 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
             Predicate<EntityRef> filter = requiredItem.getKey();
 
             int remainingToFind = requiredItem.getValue();
-            int foundCount = 0;
             boolean foundItem = false;
 
             for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
@@ -81,11 +80,14 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
                     itemCopy.saveComponent(itemComponent);
                     itemCopies.add(itemCopy);
 
-                    foundCount += itemComponent.stackCount;
+                    remainingToFind -= itemComponent.stackCount;
+                    if (remainingToFind == 0) {
+                        break;
+                    }
                 }
             }
 
-            if (!foundItem || requiredItem.getValue() > foundCount) {
+            if (!foundItem || remainingToFind > 0) {
                 return false;
             }
 
