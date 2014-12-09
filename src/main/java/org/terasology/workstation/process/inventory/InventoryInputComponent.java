@@ -1,8 +1,23 @@
+/*
+ * Copyright 2014 MovingBlocks
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.terasology.workstation.process.inventory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +26,6 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
-import org.terasology.logic.inventory.ItemComponent;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.nui.layouts.FlowLayout;
 import org.terasology.workstation.process.DescribeProcess;
@@ -23,7 +37,6 @@ import org.terasology.workstation.process.ProcessPartOrdering;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.ui.InventoryItem;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +44,7 @@ import java.util.Set;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
+    public static final int SORTORDER = -1;
     private static final Logger logger = LoggerFactory.getLogger(InventoryInputComponent.class);
 
     protected abstract Map<Predicate<EntityRef>, Integer> getInputItems();
@@ -61,26 +75,20 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
 
     @Override
     public boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
-        final List<EntityRef> itemCopies = Lists.newArrayList();
+        // Select the items to consume and save it to the process entity using the InventoryInputProcessPartSlotAmountsComponent
+        final Map<Integer, Integer> slotAmounts = Maps.newHashMap();
 
         for (Map.Entry<Predicate<EntityRef>, Integer> requiredItem : getInputItems().entrySet()) {
             Predicate<EntityRef> filter = requiredItem.getKey();
-
             int remainingToFind = requiredItem.getValue();
             boolean foundItem = false;
-
             for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
                 EntityRef item = InventoryUtils.getItemAt(workstation, slot);
                 if (filter.apply(item)) {
                     foundItem = true;
-
-                    EntityRef itemCopy = item.copy();
-                    ItemComponent itemComponent = itemCopy.getComponent(ItemComponent.class);
-                    itemComponent.stackCount = (byte) Math.min(remainingToFind, itemComponent.stackCount);
-                    itemCopy.saveComponent(itemComponent);
-                    itemCopies.add(itemCopy);
-
-                    remainingToFind -= itemComponent.stackCount;
+                    int amountToUse = (byte) Math.min(remainingToFind, InventoryUtils.getStackCount(item));
+                    slotAmounts.put(slot, amountToUse);
+                    remainingToFind -= amountToUse;
                     if (remainingToFind == 0) {
                         break;
                     }
@@ -93,12 +101,12 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
 
         }
 
-        InventoryInputProcessPartItemsComponent inputItemsComponent = processEntity.getComponent(InventoryInputProcessPartItemsComponent.class);
-        if (inputItemsComponent == null) {
-            processEntity.addComponent(new InventoryInputProcessPartItemsComponent(itemCopies));
+        InventoryInputProcessPartSlotAmountsComponent slotAmountsComponent = processEntity.getComponent(InventoryInputProcessPartSlotAmountsComponent.class);
+        if (slotAmountsComponent == null) {
+            processEntity.addComponent(new InventoryInputProcessPartSlotAmountsComponent(slotAmounts));
         } else {
-            inputItemsComponent.items.addAll(itemCopies);
-            processEntity.saveComponent(inputItemsComponent);
+            slotAmountsComponent.slotAmounts.putAll(slotAmounts);
+            processEntity.saveComponent(slotAmountsComponent);
         }
 
         return true;
@@ -111,31 +119,28 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
 
     @Override
     public void executeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
-        for (Map.Entry<Predicate<EntityRef>, Integer> requiredItem : getInputItems().entrySet()) {
-            removeItem(instigator, workstation, requiredItem.getKey(), requiredItem.getValue(), processEntity);
-        }
-    }
-
-    private void removeItem(EntityRef instigator, EntityRef workstation, Predicate<EntityRef> filter, int toRemove, EntityRef processEntity) {
-        int remainingToRemove = toRemove;
-
-        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
-            EntityRef item = InventoryUtils.getItemAt(workstation, slot);
-            if (filter.apply(item)) {
-                int remove = Math.min(InventoryUtils.getStackCount(item), remainingToRemove);
-                EntityRef removedItem = CoreRegistry.get(InventoryManager.class).removeItem(workstation, instigator, item, false, remove);
-                if (removedItem != null)
-                    remainingToRemove -= remove;
-                if (remainingToRemove == 0) {
-                    break;
+        InventoryInputProcessPartSlotAmountsComponent inputItems = processEntity.getComponent(InventoryInputProcessPartSlotAmountsComponent.class);
+        // this will be null if another process part has already consumed the items
+        if (inputItems != null) {
+            for (Map.Entry<Integer, Integer> slotAmount : inputItems.slotAmounts.entrySet()) {
+                EntityRef item = InventoryUtils.getItemAt(workstation, slotAmount.getKey());
+                if (slotAmount.getValue() > InventoryUtils.getStackCount(item)) {
+                    logger.error("Not enough items in the stack");
+                }
+                EntityRef removedItem = CoreRegistry.get(InventoryManager.class).removeItem(workstation, instigator, item, false, slotAmount.getValue());
+                if (removedItem == null) {
+                    logger.error("Could not remove input item");
                 }
             }
         }
+
+        // remove the slot amounts from the process entity, no other InventoryInput should use it
+        processEntity.removeComponent(InventoryInputProcessPartSlotAmountsComponent.class);
     }
 
     @Override
     public int getSortOrder() {
-        return -1;
+        return SORTORDER;
     }
 
     @Override

@@ -15,21 +15,18 @@
  */
 package org.terasology.workstation.process.inventory;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.Owns;
-import org.terasology.entitySystem.entity.EntityRef;
 
-import java.util.List;
+import java.util.Map;
 
-public class InventoryInputProcessPartItemsComponent implements Component {
-    @Owns
-    public List<EntityRef> items = Lists.newArrayList();
+public class InventoryInputProcessPartSlotAmountsComponent implements Component {
+    public Map<Integer, Integer> slotAmounts = Maps.newHashMap();
 
-    public InventoryInputProcessPartItemsComponent() {
+    public InventoryInputProcessPartSlotAmountsComponent() {
     }
 
-    public InventoryInputProcessPartItemsComponent(List<EntityRef> items) {
-        this.items = items;
+    public InventoryInputProcessPartSlotAmountsComponent(Map<Integer, Integer> slotAmounts) {
+        this.slotAmounts = slotAmounts;
     }
 }
