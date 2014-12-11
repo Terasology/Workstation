@@ -33,7 +33,7 @@ public class BlockFamilyOutputComponent extends InventoryOutputComponent {
     public Map<String, Integer> blockCounts;
 
     @Override
-    protected Set<EntityRef> createOutputItems() {
+    protected Set<EntityRef> createOutputItems(EntityRef processEntity) {
         return createOutputItems(blockCounts);
     }
 

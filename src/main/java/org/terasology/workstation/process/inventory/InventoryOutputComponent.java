@@ -31,6 +31,7 @@ import org.terasology.workstation.process.ErrorCheckingProcessPart;
 import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
+import org.terasology.workstation.process.ProcessPartOrdering;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.ui.InventoryItem;
 
@@ -40,10 +41,11 @@ import java.util.Set;
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart {
+public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
+    public static final int SORTORDER = 1;
     private static final Logger logger = LoggerFactory.getLogger(InventoryOutputComponent.class);
 
-    protected abstract Set<EntityRef> createOutputItems();
+    protected abstract Set<EntityRef> createOutputItems(EntityRef processEntity);
 
     @Override
     public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
@@ -62,7 +64,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
 
     @Override
     public boolean validateBeforeStart(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
-        Set<EntityRef> outputItems = createOutputItems();
+        Set<EntityRef> outputItems = createOutputItems(processEntity);
         try {
             Set<EntityRef> itemsLeftToAssign = new HashSet<>(outputItems);
             int emptySlots = 0;
@@ -104,7 +106,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
 
     @Override
     public void executeEnd(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
-        Set<EntityRef> outputItems = createOutputItems();
+        Set<EntityRef> outputItems = createOutputItems(processEntity);
 
         for (EntityRef outputItem : outputItems) {
             addItemToInventory(instigator, workstation, outputItem);
@@ -124,7 +126,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
 
     @Override
     public ProcessPartDescription getOutputDescription() {
-        Set<EntityRef> items = createOutputItems();
+        Set<EntityRef> items = createOutputItems(EntityRef.NULL);
         Set<String> descriptions = Sets.newHashSet();
         FlowLayout flowLayout = new FlowLayout();
         try {
@@ -157,7 +159,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     public void checkForErrors() throws InvalidProcessPartException {
         Set<EntityRef> items = null;
         try {
-            items = createOutputItems();
+            items = createOutputItems(EntityRef.NULL);
             if (items.size() == 0) {
                 throw new InvalidProcessPartException("No output items specified");
             }
@@ -170,5 +172,10 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
                 }
             }
         }
+    }
+
+    @Override
+    public int getSortOrder() {
+        return SORTORDER;
     }
 }

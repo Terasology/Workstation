@@ -16,11 +16,14 @@
 package org.terasology.workstation.system;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.terasology.asset.Assets;
-import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.rendering.nui.layouts.FlowLayout;
 import org.terasology.rendering.nui.widgets.UIImage;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
@@ -31,11 +34,14 @@ import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
+import org.terasology.workstation.process.ProcessPartOrdering;
 import org.terasology.workstation.process.ValidateProcess;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 import org.terasology.workstation.process.inventory.ValidateInventoryItem;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -47,16 +53,44 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     ProcessPartWorkstationProcess(Prefab prefab) throws InvalidProcessPartException {
         id = "Prefab:" + prefab.getURI().toSimpleString();
-        for (Component component : prefab.iterateComponents()) {
-            if (component instanceof ProcessPart) {
-                if (component instanceof ErrorCheckingProcessPart) {
-                    ErrorCheckingProcessPart errorChecking = (ErrorCheckingProcessPart) component;
-                    errorChecking.checkForErrors();
+
+        ProcessDefinitionComponent processDefinitionComponent = prefab.getComponent(ProcessDefinitionComponent.class);
+        processType = processDefinitionComponent.processType;
+
+        List<ProcessPart> allProcessParts = Lists.newArrayList(Iterables.filter(prefab.iterateComponents(), ProcessPart.class));
+
+        // get any process parts from the process type prefab
+        Prefab processTypePrefab = Assets.getPrefab(processType);
+        if (processTypePrefab != null) {
+            Iterables.addAll(allProcessParts, Iterables.filter(processTypePrefab.iterateComponents(), ProcessPart.class));
+        }
+
+        // order the process parts
+        Collections.sort(allProcessParts, new Comparator<ProcessPart>() {
+            @Override
+            public int compare(ProcessPart o1, ProcessPart o2) {
+                int order1 = 0;
+                int order2 = 0;
+
+                if (o1 instanceof ProcessPartOrdering) {
+                    order1 = ((ProcessPartOrdering) o1).getSortOrder();
                 }
-                processParts.add((ProcessPart) component);
-            } else if (component instanceof ProcessDefinitionComponent) {
-                processType = ((ProcessDefinitionComponent) component).processType;
+
+                if (o2 instanceof ProcessPartOrdering) {
+                    order2 = ((ProcessPartOrdering) o2).getSortOrder();
+                }
+
+                return Integer.compare(order1, order2);
             }
+        });
+
+        // only add process parts that pass error checking
+        for (ProcessPart component : allProcessParts) {
+            if (component instanceof ErrorCheckingProcessPart) {
+                ErrorCheckingProcessPart errorChecking = (ErrorCheckingProcessPart) component;
+                errorChecking.checkForErrors();
+            }
+            processParts.add(component);
         }
     }
 
@@ -91,11 +125,14 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public boolean isValid(EntityRef instigator, EntityRef workstation) {
+        EntityRef tempEntity = CoreRegistry.get(EntityManager.class).create();
+        tempEntity.setPersistent(false);
         for (ProcessPart part : processParts) {
-            if (!part.validateBeforeStart(instigator, workstation, EntityRef.NULL)) {
+            if (!part.validateBeforeStart(instigator, workstation, tempEntity)) {
                 return false;
             }
         }
+        tempEntity.destroy();
         return true;
     }
 
