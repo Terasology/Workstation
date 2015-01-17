@@ -20,23 +20,23 @@ import org.terasology.entitySystem.event.Event;
 import org.terasology.network.ServerEvent;
 
 /**
- * @author Marcin Sciesinski <marcins78@gmail.com>
+ * Send this event to the instigating entity (like the player character)
  */
 @ServerEvent
 public class WorkstationProcessRequest implements Event {
-    private EntityRef instigator;
+    private EntityRef workstation;
     private String processId;
 
     public WorkstationProcessRequest() {
     }
 
-    public WorkstationProcessRequest(EntityRef instigator, String processId) {
-        this.instigator = instigator;
+    public WorkstationProcessRequest(EntityRef workstation, String processId) {
+        this.workstation = workstation;
         this.processId = processId;
     }
 
-    public EntityRef getInstigator() {
-        return instigator;
+    public EntityRef getWorkstation() {
+        return workstation;
     }
 
     public String getProcessId() {

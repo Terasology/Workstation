@@ -97,21 +97,25 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     }
 
     @ReceiveEvent
-    public void manualWorkstationProcess(WorkstationProcessRequest event, EntityRef workstation, WorkstationComponent workstationComp) {
+    public void manualWorkstationProcess(WorkstationProcessRequest event, EntityRef instigator) {
+        EntityRef workstation = event.getWorkstation();
         String processId = event.getProcessId();
+        WorkstationComponent workstationComp = workstation.getComponent(WorkstationComponent.class);
 
-        WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processId);
-        if (process != null) {
-            String processType = process.getProcessType();
+        if (workstationComp != null) {
+            WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processId);
+            if (process != null) {
+                String processType = process.getProcessType();
 
-            WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
-            // It's not processing anything, or not processing this type of process
-            if (workstationProcessing == null || !workstationProcessing.processes.containsKey(processType)) {
-                executingProcess = true;
-                try {
-                    WorkstationUtils.startProcessingManual(event.getInstigator(), workstation, process, event, time.getGameTimeInMs());
-                } finally {
-                    executingProcess = false;
+                WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+                // It's not processing anything, or not processing this type of process
+                if (workstationProcessing == null || !workstationProcessing.processes.containsKey(processType)) {
+                    executingProcess = true;
+                    try {
+                        WorkstationUtils.startProcessingManual(instigator, workstation, process, event, time.getGameTimeInMs());
+                    } finally {
+                        executingProcess = false;
+                    }
                 }
             }
         }
