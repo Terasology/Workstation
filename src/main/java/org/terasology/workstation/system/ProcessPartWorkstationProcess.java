@@ -20,6 +20,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.terasology.asset.Assets;
+import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
@@ -125,8 +126,9 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public boolean isValid(EntityRef instigator, EntityRef workstation) {
-        EntityRef tempEntity = CoreRegistry.get(EntityManager.class).create();
-        tempEntity.setPersistent(false);
+        EntityManager entityManager = CoreRegistry.get(EntityManager.class);
+        EntityBuilder tempEntityBuilder = entityManager.newBuilder();
+        EntityRef tempEntity = tempEntityBuilder.build();
         for (ProcessPart part : processParts) {
             if (!part.validateBeforeStart(instigator, workstation, tempEntity)) {
                 return false;
