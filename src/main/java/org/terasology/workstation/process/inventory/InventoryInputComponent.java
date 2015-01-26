@@ -188,10 +188,10 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
         try {
             items = createItems();
             if (items.size() == 0) {
-                throw new InvalidProcessPartException("No input items specified");
+                throw new InvalidProcessPartException("No input items specified in " + this.getClass().getSimpleName());
             }
         } catch (Exception ex) {
-            throw new InvalidProcessPartException("Could not create input items");
+            throw new InvalidProcessPartException("Could not create input items in " + this.getClass().getSimpleName());
         } finally {
             if (items != null) {
                 for (EntityRef outputItem : items) {

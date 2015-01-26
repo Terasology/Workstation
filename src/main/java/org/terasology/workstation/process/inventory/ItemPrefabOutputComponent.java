@@ -15,6 +15,8 @@
  */
 package org.terasology.workstation.process.inventory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.ItemComponent;
@@ -28,6 +30,8 @@ import java.util.Set;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class ItemPrefabOutputComponent extends InventoryOutputComponent {
+    private static final Logger logger = LoggerFactory.getLogger(ItemPrefabOutputComponent.class);
+
     public Map<String, Integer> itemCounts;
 
     @Override
@@ -40,12 +44,17 @@ public class ItemPrefabOutputComponent extends InventoryOutputComponent {
 
         Set<EntityRef> result = new HashSet<>();
         for (Map.Entry<String, Integer> itemCount : itemCounts.entrySet()) {
-            EntityRef entityRef = entityManager.create(itemCount.getKey());
-            ItemComponent item = entityRef.getComponent(ItemComponent.class);
-            item.stackCount = itemCount.getValue().byteValue();
-            entityRef.saveComponent(item);
+            try {
+                EntityRef entityRef = entityManager.create(itemCount.getKey());
+                ItemComponent item = entityRef.getComponent(ItemComponent.class);
+                item.stackCount = itemCount.getValue().byteValue();
+                entityRef.saveComponent(item);
 
-            result.add(entityRef);
+                result.add(entityRef);
+            } catch (Exception ex) {
+                logger.error("Bad block: " + itemCount.getKey());
+                throw ex;
+            }
         }
 
         return result;

@@ -15,6 +15,8 @@
  */
 package org.terasology.workstation.process.inventory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.registry.CoreRegistry;
@@ -30,6 +32,8 @@ import java.util.Set;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public class BlockFamilyOutputComponent extends InventoryOutputComponent {
+    private static final Logger logger = LoggerFactory.getLogger(BlockFamilyOutputComponent.class);
+
     public Map<String, Integer> blockCounts;
 
     @Override
@@ -38,6 +42,7 @@ public class BlockFamilyOutputComponent extends InventoryOutputComponent {
     }
 
     public static Set<EntityRef> createOutputItems(Map<String, Integer> blockCounts) {
+
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
 
@@ -45,8 +50,13 @@ public class BlockFamilyOutputComponent extends InventoryOutputComponent {
 
         Set<EntityRef> result = new HashSet<>();
         for (Map.Entry<String, Integer> blockCount : blockCounts.entrySet()) {
-            BlockFamily blockFamily = blockManager.getBlockFamily(blockCount.getKey());
-            result.add(itemFactory.newInstance(blockFamily, blockCount.getValue()));
+            try {
+                BlockFamily blockFamily = blockManager.getBlockFamily(blockCount.getKey());
+                result.add(itemFactory.newInstance(blockFamily, blockCount.getValue()));
+            } catch (Exception ex) {
+                logger.error("Bad block: " + blockCount.getKey());
+                throw ex;
+            }
         }
 
         return result;
