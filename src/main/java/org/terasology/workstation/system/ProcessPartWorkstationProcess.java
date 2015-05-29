@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
@@ -53,7 +54,7 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     private List<ProcessPart> processParts = new LinkedList<>();
 
     ProcessPartWorkstationProcess(Prefab prefab) throws InvalidProcessPartException {
-        id = "Prefab:" + prefab.getURI().toSimpleString();
+        id = "Prefab:" + prefab.getUrn().toString();
 
         ProcessDefinitionComponent processDefinitionComponent = prefab.getComponent(ProcessDefinitionComponent.class);
         processType = processDefinitionComponent.processType;
@@ -61,9 +62,9 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         List<ProcessPart> allProcessParts = Lists.newArrayList(Iterables.filter(prefab.iterateComponents(), ProcessPart.class));
 
         // get any process parts from the process type prefab
-        Prefab processTypePrefab = Assets.getPrefab(processType);
-        if (processTypePrefab != null) {
-            Iterables.addAll(allProcessParts, Iterables.filter(processTypePrefab.iterateComponents(), ProcessPart.class));
+        Optional<Prefab> processTypePrefab = Assets.getPrefab(processType);
+        if (processTypePrefab.isPresent()) {
+            Iterables.addAll(allProcessParts, Iterables.filter(processTypePrefab.get().iterateComponents(), ProcessPart.class));
         }
 
         // order the process parts
@@ -234,7 +235,7 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     @Override
     public ProcessPartDescription getInputDescription() {
         UIImage plus = new UIImage();
-        plus.setImage(Assets.getTextureRegion("workstation:plus"));
+        plus.setImage(Assets.getTextureRegion("workstation:plus").get());
         FlowLayout flowLayout = new FlowLayout();
         Set<String> descriptions = Sets.newHashSet();
         boolean isFirst = true;

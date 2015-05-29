@@ -16,8 +16,8 @@
 package org.terasology.workstation.process.inventory;
 
 import com.google.common.base.Predicate;
-import org.terasology.asset.AssetUri;
 import org.terasology.asset.Assets;
+import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.ItemComponent;
 
@@ -35,7 +35,7 @@ public class ItemPrefabInputComponent extends InventoryInputComponent {
     protected Map<Predicate<EntityRef>, Integer> getInputItems() {
         Map<Predicate<EntityRef>, Integer> result = new HashMap<>();
         for (Map.Entry<String, Integer> itemCount : itemCounts.entrySet()) {
-            result.put(new ItemPrefabPredicate(Assets.getPrefab(itemCount.getKey()).getURI()), itemCount.getValue());
+            result.put(new ItemPrefabPredicate(Assets.getPrefab(itemCount.getKey()).get().getUrn()), itemCount.getValue());
         }
 
         return result;
@@ -56,9 +56,9 @@ public class ItemPrefabInputComponent extends InventoryInputComponent {
     }
 
     private static final class ItemPrefabPredicate implements Predicate<EntityRef> {
-        private AssetUri prefab;
+        private ResourceUrn prefab;
 
-        private ItemPrefabPredicate(AssetUri prefab) {
+        private ItemPrefabPredicate(ResourceUrn prefab) {
             this.prefab = prefab;
         }
 
@@ -68,7 +68,7 @@ public class ItemPrefabInputComponent extends InventoryInputComponent {
             if (item == null) {
                 return false;
             }
-            return input.getParentPrefab().getURI().equals(prefab);
+            return input.getParentPrefab().getUrn().equals(prefab);
         }
     }
 }

@@ -41,7 +41,7 @@ public class ProcessSummaryWidget extends CoreWidget {
             flowLayout.addWidget(inputDesc.getWidget(), null);
 
             UIImage eq = new UIImage();
-            eq.setImage(Assets.getTextureRegion("workstation:equals"));
+            eq.setImage(Assets.getTextureRegion("workstation:equals").get());
             flowLayout.addWidget(eq, null);
 
             ProcessPartDescription outputDesc = describeProcess.getOutputDescription();
