@@ -50,19 +50,18 @@ import java.util.Set;
 
 public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
     private String id;
-    private String processType;
+    private ProcessDefinitionComponent processDefinitionComponent;
     private List<ProcessPart> processParts = new LinkedList<>();
 
     ProcessPartWorkstationProcess(Prefab prefab) throws InvalidProcessPartException {
         id = "Prefab:" + prefab.getUrn().toString();
 
-        ProcessDefinitionComponent processDefinitionComponent = prefab.getComponent(ProcessDefinitionComponent.class);
-        processType = processDefinitionComponent.processType;
+        processDefinitionComponent = prefab.getComponent(ProcessDefinitionComponent.class);
 
         List<ProcessPart> allProcessParts = Lists.newArrayList(Iterables.filter(prefab.iterateComponents(), ProcessPart.class));
 
         // get any process parts from the process type prefab
-        Optional<Prefab> processTypePrefab = Assets.getPrefab(processType);
+        Optional<Prefab> processTypePrefab = Assets.getPrefab(processDefinitionComponent.processType);
         if (processTypePrefab.isPresent()) {
             Iterables.addAll(allProcessParts, Iterables.filter(processTypePrefab.get().iterateComponents(), ProcessPart.class));
         }
@@ -130,6 +129,7 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
         EntityBuilder tempEntityBuilder = entityManager.newBuilder();
         EntityRef tempEntity = tempEntityBuilder.build();
+        tempEntity.addComponent(processDefinitionComponent);
         for (ProcessPart part : processParts) {
             if (!part.validateBeforeStart(instigator, workstation, tempEntity)) {
                 return false;
@@ -170,7 +170,7 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public String getProcessType() {
-        return processType;
+        return processDefinitionComponent.processType;
     }
 
     @Override
@@ -191,6 +191,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     private long startProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
+        processEntity.addComponent(processDefinitionComponent);
+
         for (ProcessPart processPart : processParts) {
             if (!processPart.validateBeforeStart(instigator, workstation, processEntity)) {
                 throw new InvalidProcessException();
