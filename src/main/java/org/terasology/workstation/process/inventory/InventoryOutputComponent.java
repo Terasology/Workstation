@@ -42,6 +42,7 @@ import java.util.Set;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
+    public static final String WORKSTATIONOUTPUTCATEGORY = "OUTPUT";
     public static final int SORTORDER = 1;
     private static final Logger logger = LoggerFactory.getLogger(InventoryOutputComponent.class);
 
@@ -49,7 +50,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
 
     @Override
     public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
-        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT")) {
+        for (int slot : WorkstationInventoryUtils.getAssignedOutputSlots(workstation, WORKSTATIONOUTPUTCATEGORY)) {
             if (slot == slotNo) {
                 return true;
             }
@@ -69,7 +70,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
             Set<EntityRef> itemsLeftToAssign = new HashSet<>(outputItems);
             int emptySlots = 0;
 
-            for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT")) {
+            for (int slot : WorkstationInventoryUtils.getAssignedOutputSlots(workstation, WORKSTATIONOUTPUTCATEGORY)) {
                 EntityRef item = InventoryUtils.getItemAt(workstation, slot);
                 if (item.exists()) {
                     for (EntityRef itemLeftToAssign : itemsLeftToAssign) {
@@ -114,7 +115,7 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     }
 
     private void addItemToInventory(EntityRef instigator, EntityRef workstation, EntityRef outputItem) {
-        if (!CoreRegistry.get(InventoryManager.class).giveItem(workstation, instigator, outputItem, WorkstationInventoryUtils.getAssignedSlots(workstation, "OUTPUT"))) {
+        if (!CoreRegistry.get(InventoryManager.class).giveItem(workstation, instigator, outputItem, WorkstationInventoryUtils.getAssignedOutputSlots(workstation, "OUTPUT"))) {
             outputItem.destroy();
         }
     }

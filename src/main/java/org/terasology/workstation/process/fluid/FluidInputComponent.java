@@ -63,7 +63,7 @@ public class FluidInputComponent implements Component, ProcessPart, ValidateFlui
 
     @Override
     public boolean isResponsibleForFluidSlot(EntityRef workstation, int slotNo) {
-        return WorkstationInventoryUtils.getAssignedSlots(workstation, FLUIDINPUTCATEGORY).contains(slotNo);
+        return WorkstationInventoryUtils.getAssignedInputSlots(workstation, FLUIDINPUTCATEGORY).contains(slotNo);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class FluidInputComponent implements Component, ProcessPart, ValidateFlui
             Predicate<String> filter = requiredItem.getKey();
             float remainingToFind = requiredItem.getValue();
             boolean foundItem = false;
-            for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, FLUIDINPUTCATEGORY)) {
+            for (int slot : WorkstationInventoryUtils.getAssignedInputSlots(workstation, FLUIDINPUTCATEGORY)) {
                 String item = FluidUtils.getFluidAt(workstation, slot);
                 if (filter.apply(item)) {
                     foundItem = true;

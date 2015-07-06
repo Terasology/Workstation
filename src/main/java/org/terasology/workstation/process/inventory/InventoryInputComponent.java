@@ -44,6 +44,7 @@ import java.util.Set;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
+    public static final String WORKSTATIONINPUTCATEGORY = "INPUT";
     public static final int SORTORDER = -1;
     private static final Logger logger = LoggerFactory.getLogger(InventoryInputComponent.class);
 
@@ -53,7 +54,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
 
     @Override
     public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
-        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
+        for (int slot : WorkstationInventoryUtils.getAssignedInputSlots(workstation, WORKSTATIONINPUTCATEGORY)) {
             if (slot == slotNo) {
                 return true;
             }
@@ -82,7 +83,7 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
             Predicate<EntityRef> filter = requiredItem.getKey();
             int remainingToFind = requiredItem.getValue();
             boolean foundItem = false;
-            for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, "INPUT")) {
+            for (int slot : WorkstationInventoryUtils.getAssignedInputSlots(workstation, WORKSTATIONINPUTCATEGORY)) {
                 EntityRef item = InventoryUtils.getItemAt(workstation, slot);
                 if (filter.apply(item)) {
                     foundItem = true;

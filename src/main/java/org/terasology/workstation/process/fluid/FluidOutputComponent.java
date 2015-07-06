@@ -47,7 +47,7 @@ public class FluidOutputComponent implements Component, ProcessPart, ValidateFlu
 
     @Override
     public boolean isResponsibleForFluidSlot(EntityRef workstation, int slotNo) {
-        return WorkstationInventoryUtils.getAssignedSlots(workstation, FLUIDOUTPUTCATEGORY).contains(slotNo);
+        return WorkstationInventoryUtils.getAssignedOutputSlots(workstation, FLUIDOUTPUTCATEGORY).contains(slotNo);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class FluidOutputComponent implements Component, ProcessPart, ValidateFlu
         Map<String, Float> itemsLeftToAssign = Maps.newHashMap(outputItems);
         int emptySlots = 0;
 
-        for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, FLUIDOUTPUTCATEGORY)) {
+        for (int slot : WorkstationInventoryUtils.getAssignedOutputSlots(workstation, FLUIDOUTPUTCATEGORY)) {
             String fluid = FluidUtils.getFluidAt(workstation, slot);
             if (fluid != null) {
                 for (Map.Entry<String, Float> itemLeftToAssign : itemsLeftToAssign.entrySet()) {
@@ -97,7 +97,7 @@ public class FluidOutputComponent implements Component, ProcessPart, ValidateFlu
         Map<String, Float> outputItems = Maps.newHashMap(fluidVolumes);
 
         for (Map.Entry<String, Float> outputItem : outputItems.entrySet()) {
-            for (int slot : WorkstationInventoryUtils.getAssignedSlots(workstation, FLUIDOUTPUTCATEGORY)) {
+            for (int slot : WorkstationInventoryUtils.getAssignedOutputSlots(workstation, FLUIDOUTPUTCATEGORY)) {
                 if (CoreRegistry.get(FluidManager.class).addFluid(instigator, workstation, slot, outputItem.getKey(), outputItem.getValue())) {
                     break;
                 }

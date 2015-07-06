@@ -15,7 +15,9 @@
  */
 package org.terasology.workstation.process;
 
+import com.google.common.collect.Lists;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.logic.inventory.InventoryAccessComponent;
 import org.terasology.workstation.component.WorkstationInventoryComponent;
 
 import java.util.Collections;
@@ -39,5 +41,43 @@ public final class WorkstationInventoryUtils {
             }
         }
         return Collections.unmodifiableList(result);
+    }
+
+    public static List<Integer> getAssignedSlots(EntityRef workstation, boolean isOutputType, String type) {
+        if (isOutputType) {
+            return getAssignedOutputSlots(workstation, type);
+        } else {
+            return getAssignedInputSlots(workstation, type);
+        }
+    }
+
+    public static List<Integer> getAssignedInputSlots(EntityRef workstation, String type) {
+        InventoryAccessComponent inventoryAccessComponent = workstation.getComponent(InventoryAccessComponent.class);
+        if (inventoryAccessComponent != null && inventoryAccessComponent.input.containsKey(type)) {
+            return Lists.newLinkedList(inventoryAccessComponent.input.get(type));
+        }
+        // fallback to the old system
+        return getAssignedSlots(workstation, type);
+    }
+
+    public static List<Integer> getAssignedOutputSlots(EntityRef workstation, String type) {
+        InventoryAccessComponent inventoryAccessComponent = workstation.getComponent(InventoryAccessComponent.class);
+        if (inventoryAccessComponent != null && inventoryAccessComponent.output.containsKey(type)) {
+            return Lists.newLinkedList(inventoryAccessComponent.output.get(type));
+        }
+        // fallback to the old system
+        return getAssignedSlots(workstation, type);
+    }
+
+    public static boolean hasAssignedSlots(EntityRef workstation, boolean isOutputCategory, String type) {
+        InventoryAccessComponent inventoryAccessComponent = workstation.getComponent(InventoryAccessComponent.class);
+        if (inventoryAccessComponent != null) {
+            if (isOutputCategory) {
+                return inventoryAccessComponent.output.containsKey(type);
+            } else {
+                return inventoryAccessComponent.input.containsKey(type);
+            }
+        }
+        return false;
     }
 }

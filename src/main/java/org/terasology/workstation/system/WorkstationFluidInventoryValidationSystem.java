@@ -19,10 +19,10 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.fluid.event.BeforeFluidPutInInventory;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
-import org.terasology.workstation.component.WorkstationInventoryComponent;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 
@@ -36,7 +36,7 @@ public class WorkstationFluidInventoryValidationSystem extends BaseComponentSyst
 
     @ReceiveEvent
     public void itemPutIntoWorkstation(BeforeFluidPutInInventory event, EntityRef entity,
-                                       WorkstationComponent workstation, WorkstationInventoryComponent workstationInventory) {
+                                       WorkstationComponent workstation, FluidInventoryComponent fluidInventory) {
         int slot = event.getSlot();
 
         boolean hasValidation = false;
