@@ -34,6 +34,8 @@ public class InventoryItem extends ItemCell {
         icon.bindMesh(new DefaultBinding(icon.getMesh()));
         icon.bindQuantity(new DefaultBinding(icon.getQuantity()));
         ((UIList<TooltipLine>) icon.getTooltip()).bindList(new DefaultBinding(((UIList<TooltipLine>) icon.getTooltip()).getList()));
+
+        this.item = EntityRef.NULL;
     }
 
 

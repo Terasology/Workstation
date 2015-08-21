@@ -128,6 +128,7 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     public boolean isValid(EntityRef instigator, EntityRef workstation) {
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
         EntityBuilder tempEntityBuilder = entityManager.newBuilder();
+        tempEntityBuilder.setPersistent(false);
         EntityRef tempEntity = tempEntityBuilder.build();
         tempEntity.addComponent(processDefinitionComponent);
         for (ProcessPart part : processParts) {

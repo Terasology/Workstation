@@ -17,6 +17,7 @@ package org.terasology.workstation.process.inventory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.registry.CoreRegistry;
@@ -38,10 +39,10 @@ public class BlockFamilyOutputComponent extends InventoryOutputComponent {
 
     @Override
     protected Set<EntityRef> createOutputItems(EntityRef processEntity) {
-        return createOutputItems(blockCounts);
+        return createOutputItems(blockCounts, processEntity.isPersistent());
     }
 
-    public static Set<EntityRef> createOutputItems(Map<String, Integer> blockCounts) {
+    public static Set<EntityRef> createOutputItems(Map<String, Integer> blockCounts, boolean createPersistentEntities) {
 
         BlockManager blockManager = CoreRegistry.get(BlockManager.class);
         EntityManager entityManager = CoreRegistry.get(EntityManager.class);
@@ -52,7 +53,9 @@ public class BlockFamilyOutputComponent extends InventoryOutputComponent {
         for (Map.Entry<String, Integer> blockCount : blockCounts.entrySet()) {
             try {
                 BlockFamily blockFamily = blockManager.getBlockFamily(blockCount.getKey());
-                result.add(itemFactory.newInstance(blockFamily, blockCount.getValue()));
+                EntityBuilder entityBuilder = itemFactory.newBuilder(blockFamily, blockCount.getValue());
+                entityBuilder.setPersistent(createPersistentEntities);
+                result.add(entityBuilder.build());
             } catch (Exception ex) {
                 logger.error("Bad block: " + blockCount.getKey());
                 throw ex;

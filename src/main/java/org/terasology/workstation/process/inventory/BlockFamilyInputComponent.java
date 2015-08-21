@@ -42,7 +42,7 @@ public class BlockFamilyInputComponent extends InventoryInputComponent {
 
     @Override
     protected Set<EntityRef> createItems() {
-        return BlockFamilyOutputComponent.createOutputItems(blockCounts);
+        return BlockFamilyOutputComponent.createOutputItems(blockCounts, false);
     }
 
     @Override
