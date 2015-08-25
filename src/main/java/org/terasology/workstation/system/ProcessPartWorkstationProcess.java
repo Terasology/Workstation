@@ -20,6 +20,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.terasology.asset.Assets;
+import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
@@ -36,11 +37,13 @@ import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ProcessPartOrdering;
+import org.terasology.workstation.process.ProcessRelatedAssets;
 import org.terasology.workstation.process.ValidateProcess;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 import org.terasology.workstation.process.inventory.ValidateInventoryItem;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -48,7 +51,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
+public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess, ProcessRelatedAssets {
     private String id;
     private ProcessDefinitionComponent processDefinitionComponent;
     private List<ProcessPart> processParts = new LinkedList<>();
@@ -267,5 +270,28 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
             }
         }
         return complexity;
+    }
+
+
+    @Override
+    public Collection<ResourceUrn> getOutputRelatedAssets() {
+        Set<ResourceUrn> assets = Sets.newHashSet();
+        for (ProcessPart part : processParts) {
+            if (part instanceof ProcessRelatedAssets) {
+                assets.addAll(((ProcessRelatedAssets) part).getOutputRelatedAssets());
+            }
+        }
+        return assets;
+    }
+
+    @Override
+    public Collection<ResourceUrn> getInputRelatedAssets() {
+        Set<ResourceUrn> assets = Sets.newHashSet();
+        for (ProcessPart part : processParts) {
+            if (part instanceof ProcessRelatedAssets) {
+                assets.addAll(((ProcessRelatedAssets) part).getInputRelatedAssets());
+            }
+        }
+        return assets;
     }
 }

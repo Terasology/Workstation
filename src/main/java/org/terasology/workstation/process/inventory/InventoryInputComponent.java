@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.common.DisplayNameComponent;
@@ -34,16 +35,20 @@ import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ProcessPartOrdering;
+import org.terasology.workstation.process.ProcessRelatedAssets;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.ui.InventoryItem;
+import org.terasology.world.block.items.BlockItemComponent;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
+public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering, ProcessRelatedAssets {
     public static final String WORKSTATIONINPUTCATEGORY = "INPUT";
     public static final int SORTORDER = -1;
     private static final Logger logger = LoggerFactory.getLogger(InventoryInputComponent.class);
@@ -200,5 +205,25 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
                 }
             }
         }
+    }
+
+    @Override
+    public Collection<ResourceUrn> getOutputRelatedAssets() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<ResourceUrn> getInputRelatedAssets() {
+        Set<ResourceUrn> assets = Sets.newHashSet();
+        for (EntityRef item : createItems()) {
+            ResourceUrn resourceUrn = item.getParentPrefab().getUrn();
+            // Treat blocks differently as they have special rules
+            BlockItemComponent blockItemComponent = item.getComponent(BlockItemComponent.class);
+            if (blockItemComponent != null) {
+                resourceUrn = blockItemComponent.blockFamily.getURI().getBlockFamilyDefinitionUrn();
+            }
+            assets.add(resourceUrn);
+        }
+        return assets;
     }
 }

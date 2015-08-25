@@ -19,6 +19,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.common.DisplayNameComponent;
@@ -32,16 +33,20 @@ import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ProcessPartOrdering;
+import org.terasology.workstation.process.ProcessRelatedAssets;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.ui.InventoryItem;
+import org.terasology.world.block.items.BlockItemComponent;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
+public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering, ProcessRelatedAssets {
     public static final String WORKSTATIONOUTPUTCATEGORY = "OUTPUT";
     public static final int SORTORDER = 1;
     private static final Logger logger = LoggerFactory.getLogger(InventoryOutputComponent.class);
@@ -178,5 +183,26 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     @Override
     public int getSortOrder() {
         return SORTORDER;
+    }
+
+
+    @Override
+    public Collection<ResourceUrn> getOutputRelatedAssets() {
+        Set<ResourceUrn> assets = Sets.newHashSet();
+        for (EntityRef item : createOutputItems(EntityRef.NULL)) {
+            ResourceUrn resourceUrn = item.getParentPrefab().getUrn();
+            // Treat blocks differently as they have special rules
+            BlockItemComponent blockItemComponent = item.getComponent(BlockItemComponent.class);
+            if (blockItemComponent != null) {
+                resourceUrn = blockItemComponent.blockFamily.getURI().getBlockFamilyDefinitionUrn();
+            }
+            assets.add(resourceUrn);
+        }
+        return assets;
+    }
+
+    @Override
+    public Collection<ResourceUrn> getInputRelatedAssets() {
+        return Collections.emptyList();
     }
 }
