@@ -23,6 +23,7 @@ import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.In;
@@ -43,7 +44,9 @@ import java.util.Map;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 @RegisterSystem(RegisterMode.AUTHORITY)
-public class WorkstationAuthoritySystem extends BaseComponentSystem {
+public class WorkstationAuthoritySystem extends BaseComponentSystem implements UpdateSubscriberSystem {
+    private static final int AUTOMATIC_PROCESSING_REVIVAL_INTERVAL = 10000;
+
     @In
     private WorkstationRegistry workstationRegistry;
     @In
@@ -52,6 +55,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
     private EntityManager entityManager;
 
     private boolean executingProcess;
+    private long nextAutomaticProcessingRevivalTime;
 
     // I would rather use LinkedHashSet, however cannot due to PojoEntityRef's hashcode changing when it is being destroyed.
     private Deque<EntityRef> pendingWorkstationChecks = new LinkedList<>();
@@ -175,6 +179,23 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem {
         for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(possibleProcesses.keySet())) {
             if (possibleProcesses.get(workstationProcess.getProcessType())) {
                 WorkstationUtils.startProcessingAutomatic(entity, workstationProcess, time.getGameTimeInMs());
+            }
+        }
+    }
+
+    @Override
+    public void update(float delta) {
+        long currentTime = time.getGameTimeInMs();
+        if (currentTime > nextAutomaticProcessingRevivalTime) {
+            nextAutomaticProcessingRevivalTime = currentTime + AUTOMATIC_PROCESSING_REVIVAL_INTERVAL;
+            for (EntityRef entityRef : entityManager.getEntitiesWith(WorkstationComponent.class, BlockComponent.class)) {
+                WorkstationComponent workstationComponent = entityRef.getComponent(WorkstationComponent.class);
+                if (workstationComponent.supportedProcessTypes.containsValue(true)
+                        && !entityRef.hasComponent(WorkstationProcessingComponent.class)) {
+                    // there are automatic processes and there is no process currently running, trigger a state change event
+                    // sometimes automatic workstations need to be jump started after world load or if there are not sufficient state changed events
+                    entityRef.send(new WorkstationStateChanged());
+                }
             }
         }
     }

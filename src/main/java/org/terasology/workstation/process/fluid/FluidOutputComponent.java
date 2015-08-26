@@ -66,8 +66,8 @@ public class FluidOutputComponent implements Component, ProcessPart, ValidateFlu
             String fluid = FluidUtils.getFluidAt(workstation, slot);
             if (fluid != null) {
                 for (Map.Entry<String, Float> itemLeftToAssign : itemsLeftToAssign.entrySet()) {
-                    if (itemLeftToAssign.equals(fluid)) {
-                        itemsLeftToAssign.remove(itemLeftToAssign);
+                    if (itemLeftToAssign.getKey().equals(fluid)) {
+                        itemsLeftToAssign.remove(fluid);
                         break;
                     }
                 }
