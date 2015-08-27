@@ -46,15 +46,6 @@ public class ItemPrefabInputComponent extends InventoryInputComponent {
         return ItemPrefabOutputComponent.createOutputItems(itemCounts, false);
     }
 
-    @Override
-    public int getComplexity() {
-        int total = 0;
-        for (Integer count : itemCounts.values()) {
-            total += count;
-        }
-        return total * itemCounts.size();
-    }
-
     private static final class ItemPrefabPredicate implements Predicate<EntityRef> {
         private ResourceUrn prefab;
 

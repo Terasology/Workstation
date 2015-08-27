@@ -15,8 +15,7 @@
  */
 package org.terasology.workstation.process.inventory;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.assets.ResourceUrn;
@@ -26,14 +25,12 @@ import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.rendering.nui.layouts.FlowLayout;
 import org.terasology.workstation.process.DescribeProcess;
 import org.terasology.workstation.process.ErrorCheckingProcessPart;
 import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ProcessPartOrdering;
-import org.terasology.workstation.process.ProcessRelatedAssets;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.ui.InventoryItem;
 import org.terasology.world.block.items.BlockItemComponent;
@@ -41,12 +38,13 @@ import org.terasology.world.block.items.BlockItemComponent;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering, ProcessRelatedAssets {
+public abstract class InventoryOutputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
     public static final String WORKSTATIONOUTPUTCATEGORY = "OUTPUT";
     public static final int SORTORDER = 1;
     private static final Logger logger = LoggerFactory.getLogger(InventoryOutputComponent.class);
@@ -126,25 +124,17 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     }
 
     @Override
-    public ProcessPartDescription getInputDescription() {
-        return null;
+    public Collection<ProcessPartDescription> getInputDescriptions() {
+        return Collections.emptyList();
     }
 
     @Override
-    public ProcessPartDescription getOutputDescription() {
+    public Collection<ProcessPartDescription> getOutputDescriptions() {
+        List<ProcessPartDescription> descriptions = Lists.newLinkedList();
         Set<EntityRef> items = createOutputItems(EntityRef.NULL);
-        Set<String> descriptions = Sets.newHashSet();
-        FlowLayout flowLayout = new FlowLayout();
         try {
             for (EntityRef item : items) {
-                int stackCount = InventoryUtils.getStackCount(item);
-                DisplayNameComponent displayNameComponent = item.getComponent(DisplayNameComponent.class);
-                if (displayNameComponent != null) {
-                    descriptions.add(stackCount + " " + item.getComponent(DisplayNameComponent.class).name);
-                    flowLayout.addWidget(new InventoryItem(item), null);
-                } else {
-                    logger.error(item.toString() + " DisplayNameComponent not found");
-                }
+                descriptions.add(createProcessPartDescription(item));
             }
         } finally {
             for (EntityRef outputItem : items) {
@@ -152,14 +142,27 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
             }
         }
 
-        return new ProcessPartDescription(Joiner.on(", ").join(descriptions), flowLayout);
+        return descriptions;
     }
 
-    @Override
-    public int getComplexity() {
-        return 0;
-    }
+    public static ProcessPartDescription createProcessPartDescription(EntityRef item) {
+        ResourceUrn resourceUrn = item.getParentPrefab().getUrn();
+        // Treat blocks differently as they have special rules
+        BlockItemComponent blockItemComponent = item.getComponent(BlockItemComponent.class);
+        if (blockItemComponent != null) {
+            resourceUrn = blockItemComponent.blockFamily.getURI().getBlockFamilyDefinitionUrn();
+        }
 
+        int stackCount = InventoryUtils.getStackCount(item);
+        String displayName = "";
+        DisplayNameComponent displayNameComponent = item.getComponent(DisplayNameComponent.class);
+        if (displayNameComponent != null) {
+            displayName = displayNameComponent.name;
+        } else {
+            logger.error(item.toString() + " DisplayNameComponent not found");
+        }
+        return new ProcessPartDescription(resourceUrn, stackCount + " " + displayName, new InventoryItem(item));
+    }
 
     @Override
     public void checkForErrors() throws InvalidProcessPartException {
@@ -183,26 +186,5 @@ public abstract class InventoryOutputComponent implements Component, ProcessPart
     @Override
     public int getSortOrder() {
         return SORTORDER;
-    }
-
-
-    @Override
-    public Collection<ResourceUrn> getOutputRelatedAssets() {
-        Set<ResourceUrn> assets = Sets.newHashSet();
-        for (EntityRef item : createOutputItems(EntityRef.NULL)) {
-            ResourceUrn resourceUrn = item.getParentPrefab().getUrn();
-            // Treat blocks differently as they have special rules
-            BlockItemComponent blockItemComponent = item.getComponent(BlockItemComponent.class);
-            if (blockItemComponent != null) {
-                resourceUrn = blockItemComponent.blockFamily.getURI().getBlockFamilyDefinitionUrn();
-            }
-            assets.add(resourceUrn);
-        }
-        return assets;
-    }
-
-    @Override
-    public Collection<ResourceUrn> getInputRelatedAssets() {
-        return Collections.emptyList();
     }
 }

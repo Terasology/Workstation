@@ -15,16 +15,13 @@
  */
 package org.terasology.workstation.process.inventory;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.registry.CoreRegistry;
@@ -35,20 +32,18 @@ import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ProcessPartOrdering;
-import org.terasology.workstation.process.ProcessRelatedAssets;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
-import org.terasology.workstation.ui.InventoryItem;
-import org.terasology.world.block.items.BlockItemComponent;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
-public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering, ProcessRelatedAssets {
+public abstract class InventoryInputComponent implements Component, ProcessPart, ValidateInventoryItem, DescribeProcess, ErrorCheckingProcessPart, ProcessPartOrdering {
     public static final String WORKSTATIONINPUTCATEGORY = "INPUT";
     public static final int SORTORDER = -1;
     private static final Logger logger = LoggerFactory.getLogger(InventoryInputComponent.class);
@@ -154,20 +149,13 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     }
 
     @Override
-    public ProcessPartDescription getInputDescription() {
+    public Collection<ProcessPartDescription> getInputDescriptions() {
+        List<ProcessPartDescription> descriptions = Lists.newLinkedList();
         Set<EntityRef> items = createItems();
-        Set<String> descriptions = Sets.newHashSet();
         FlowLayout flowLayout = new FlowLayout();
         try {
             for (EntityRef item : items) {
-                int stackCount = InventoryUtils.getStackCount(item);
-                DisplayNameComponent displayNameComponent = item.getComponent(DisplayNameComponent.class);
-                if (displayNameComponent != null) {
-                    descriptions.add(stackCount + " " + displayNameComponent.name);
-                    flowLayout.addWidget(new InventoryItem(item), null);
-                } else {
-                    logger.error(item.toString() + " DisplayNameComponent not found");
-                }
+                descriptions.add(InventoryOutputComponent.createProcessPartDescription(item));
             }
         } finally {
             for (EntityRef outputItem : items) {
@@ -175,17 +163,12 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
             }
         }
 
-        return new ProcessPartDescription(Joiner.on(", ").join(descriptions), flowLayout);
+        return descriptions;
     }
 
     @Override
-    public ProcessPartDescription getOutputDescription() {
-        return null;
-    }
-
-    @Override
-    public int getComplexity() {
-        return 0;
+    public Collection<ProcessPartDescription> getOutputDescriptions() {
+        return Collections.emptyList();
     }
 
     @Override
@@ -205,25 +188,5 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
                 }
             }
         }
-    }
-
-    @Override
-    public Collection<ResourceUrn> getOutputRelatedAssets() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public Collection<ResourceUrn> getInputRelatedAssets() {
-        Set<ResourceUrn> assets = Sets.newHashSet();
-        for (EntityRef item : createItems()) {
-            ResourceUrn resourceUrn = item.getParentPrefab().getUrn();
-            // Treat blocks differently as they have special rules
-            BlockItemComponent blockItemComponent = item.getComponent(BlockItemComponent.class);
-            if (blockItemComponent != null) {
-                resourceUrn = blockItemComponent.blockFamily.getURI().getBlockFamilyDefinitionUrn();
-            }
-            assets.add(resourceUrn);
-        }
-        return assets;
     }
 }

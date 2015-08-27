@@ -15,19 +15,15 @@
  */
 package org.terasology.workstation.system;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.terasology.asset.Assets;
-import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.rendering.nui.layouts.FlowLayout;
-import org.terasology.rendering.nui.widgets.UIImage;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.DescribeProcess;
@@ -37,7 +33,6 @@ import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ProcessPartOrdering;
-import org.terasology.workstation.process.ProcessRelatedAssets;
 import org.terasology.workstation.process.ValidateProcess;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
@@ -51,7 +46,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess, ProcessRelatedAssets {
+public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
     private String id;
     private ProcessDefinitionComponent processDefinitionComponent;
     private List<ProcessPart> processParts = new LinkedList<>();
@@ -223,75 +218,24 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     @Override
-    public ProcessPartDescription getOutputDescription() {
-        FlowLayout flowLayout = new FlowLayout();
-        Set<String> descriptions = Sets.newHashSet();
+    public Collection<ProcessPartDescription> getOutputDescriptions() {
+        Set<ProcessPartDescription> descriptions = Sets.newHashSet();
         for (ProcessPart part : processParts) {
             if (part instanceof DescribeProcess) {
-                ProcessPartDescription description = ((DescribeProcess) part).getOutputDescription();
-                if (description != null) {
-                    descriptions.add(description.toString());
-                    flowLayout.addWidget(description.getWidget(), null);
-                }
+                descriptions.addAll(((DescribeProcess) part).getOutputDescriptions());
             }
         }
-        return new ProcessPartDescription(Joiner.on(", ").join(descriptions), flowLayout);
+        return descriptions;
     }
 
     @Override
-    public ProcessPartDescription getInputDescription() {
-        UIImage plus = new UIImage();
-        plus.setImage(Assets.getTextureRegion("workstation:plus").get());
-        FlowLayout flowLayout = new FlowLayout();
-        Set<String> descriptions = Sets.newHashSet();
-        boolean isFirst = true;
+    public Collection<ProcessPartDescription> getInputDescriptions() {
+        Set<ProcessPartDescription> descriptions = Sets.newHashSet();
         for (ProcessPart part : processParts) {
             if (part instanceof DescribeProcess) {
-                ProcessPartDescription description = ((DescribeProcess) part).getInputDescription();
-                if (description != null) {
-                    if (!isFirst) {
-                        flowLayout.addWidget(plus, null);
-                    }
-                    isFirst = false;
-                    descriptions.add(description.toString());
-                    flowLayout.addWidget(description.getWidget(), null);
-                }
+                descriptions.addAll(((DescribeProcess) part).getInputDescriptions());
             }
         }
-        return new ProcessPartDescription(Joiner.on(" + ").join(descriptions), flowLayout);
-    }
-
-    @Override
-    public int getComplexity() {
-        int complexity = 0;
-        for (ProcessPart part : processParts) {
-            if (part instanceof DescribeProcess) {
-                complexity += ((DescribeProcess) part).getComplexity();
-            }
-        }
-        return complexity;
-    }
-
-
-    @Override
-    public Collection<ResourceUrn> getOutputRelatedAssets() {
-        Set<ResourceUrn> assets = Sets.newHashSet();
-        for (ProcessPart part : processParts) {
-            if (part instanceof ProcessRelatedAssets) {
-                assets.addAll(((ProcessRelatedAssets) part).getOutputRelatedAssets());
-            }
-        }
-        return assets;
-    }
-
-    @Override
-    public Collection<ResourceUrn> getInputRelatedAssets() {
-        Set<ResourceUrn> assets = Sets.newHashSet();
-        for (ProcessPart part : processParts) {
-            if (part instanceof ProcessRelatedAssets) {
-                assets.addAll(((ProcessRelatedAssets) part).getInputRelatedAssets());
-            }
-        }
-        return assets;
+        return descriptions;
     }
 }

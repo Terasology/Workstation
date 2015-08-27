@@ -45,15 +45,6 @@ public class BlockFamilyInputComponent extends InventoryInputComponent {
         return BlockFamilyOutputComponent.createOutputItems(blockCounts, false);
     }
 
-    @Override
-    public int getComplexity() {
-        int total = 0;
-        for (Integer count : blockCounts.values()) {
-            total += count;
-        }
-        return total * blockCounts.size();
-    }
-
     private static final class BlockFamilyPredicate implements Predicate<EntityRef> {
         private BlockUri blockFamilyUri;
 

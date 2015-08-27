@@ -15,11 +15,11 @@
  */
 package org.terasology.workstation.process.fluid;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.Component;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.fluid.system.FluidManager;
@@ -35,6 +35,8 @@ import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.ProcessPartOrdering;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -106,26 +108,26 @@ public class FluidOutputComponent implements Component, ProcessPart, ValidateFlu
     }
 
     @Override
-    public ProcessPartDescription getInputDescription() {
-        return null;
+    public Collection<ProcessPartDescription> getInputDescriptions() {
+        return Collections.emptyList();
     }
 
     @Override
-    public ProcessPartDescription getOutputDescription() {
-        Set<String> descriptions = Sets.newHashSet();
+    public Collection<ProcessPartDescription> getOutputDescriptions() {
+        FluidRegistry fluidRegistry = CoreRegistry.get(FluidRegistry.class);
+        Set<ProcessPartDescription> descriptions = Sets.newHashSet();
 
         for (Map.Entry<String, Float> fluidAmount : fluidVolumes.entrySet()) {
-            descriptions.add(fluidAmount.getValue() + " " + fluidAmount.getKey());
+            String fluidName = fluidAmount.getKey();
+            FluidRenderer fluidRenderer = fluidRegistry.getFluidRenderer(fluidAmount.getKey());
+            if (fluidRenderer == null) {
+                fluidName = fluidRenderer.getFluidName();
+            }
+            descriptions.add(new ProcessPartDescription(new ResourceUrn(fluidAmount.getKey()), fluidAmount.getValue() + "mL " + fluidName));
         }
 
-        return new ProcessPartDescription(Joiner.on(", ").join(descriptions));
+        return descriptions;
     }
-
-    @Override
-    public int getComplexity() {
-        return 0;
-    }
-
 
     @Override
     public void checkForErrors() throws InvalidProcessPartException {
@@ -136,7 +138,8 @@ public class FluidOutputComponent implements Component, ProcessPart, ValidateFlu
             }
 
             for (Map.Entry<String, Float> fluidAmount : fluidVolumes.entrySet()) {
-                FluidRenderer fluidRenderer = fluidRegistry.getFluidRenderer(fluidAmount.getKey());
+                ResourceUrn resourceUrn = new ResourceUrn(fluidAmount.getKey());
+                FluidRenderer fluidRenderer = fluidRegistry.getFluidRenderer(resourceUrn.toString());
                 if (fluidRenderer == null) {
                     throw new InvalidProcessPartException(fluidAmount.getKey() + " is an invalid fluid in " + this.getClass().getSimpleName());
                 }

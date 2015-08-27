@@ -35,17 +35,33 @@ public class ProcessSummaryWidget extends CoreWidget {
 
     public ProcessSummaryWidget(WorkstationProcess process) {
         FlowLayout flowLayout = new FlowLayout();
+        UIImage plus = new UIImage(Assets.getTextureRegion("workstation:plus").get());
+        UIImage eq = new UIImage(Assets.getTextureRegion("workstation:equals").get());
+
         if (process instanceof DescribeProcess) {
             DescribeProcess describeProcess = (DescribeProcess) process;
-            ProcessPartDescription inputDesc = describeProcess.getInputDescription();
-            flowLayout.addWidget(inputDesc.getWidget(), null);
+            boolean isFirst = true;
+            // add all input widgets
+            for (ProcessPartDescription inputDesc : describeProcess.getInputDescriptions()) {
+                if (!isFirst) {
+                    flowLayout.addWidget(plus, null);
+                }
+                isFirst = false;
+                flowLayout.addWidget(inputDesc.getWidget(), null);
+            }
 
-            UIImage eq = new UIImage();
-            eq.setImage(Assets.getTextureRegion("workstation:equals").get());
+            // add the equals separator
             flowLayout.addWidget(eq, null);
 
-            ProcessPartDescription outputDesc = describeProcess.getOutputDescription();
-            flowLayout.addWidget(outputDesc.getWidget(), null);
+            // add the output widgets
+            isFirst = true;
+            for (ProcessPartDescription outputDesc : describeProcess.getOutputDescriptions()) {
+                if (!isFirst) {
+                    flowLayout.addWidget(plus, null);
+                }
+                isFirst = false;
+                flowLayout.addWidget(outputDesc.getWidget(), null);
+            }
 
             widget = flowLayout;
         } else {

@@ -15,10 +15,10 @@
  */
 package org.terasology.workstation.process;
 
+import java.util.Collection;
+
 public interface DescribeProcess {
-    ProcessPartDescription getOutputDescription();
+    Collection<ProcessPartDescription> getOutputDescriptions();
 
-    ProcessPartDescription getInputDescription();
-
-    int getComplexity();
+    Collection<ProcessPartDescription> getInputDescriptions();
 }

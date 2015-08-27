@@ -15,20 +15,23 @@
  */
 package org.terasology.workstation.process;
 
+import org.terasology.assets.ResourceUrn;
 import org.terasology.rendering.nui.UIWidget;
 import org.terasology.rendering.nui.widgets.UILabel;
 
 public class ProcessPartDescription {
     UIWidget widget;
     String description;
+    ResourceUrn resourceUrn;
 
-    public ProcessPartDescription(String description) {
-        this.description = description;
+    public ProcessPartDescription(ResourceUrn resourceUrn, String description) {
+        this(resourceUrn, description, new UILabel(description));
     }
 
-    public ProcessPartDescription(String description, UIWidget widget) {
-        this.widget = widget;
+    public ProcessPartDescription(ResourceUrn resourceUrn, String description, UIWidget widget) {
+        this.resourceUrn = resourceUrn;
         this.description = description;
+        this.widget = widget;
     }
 
     @Override
@@ -44,6 +47,10 @@ public class ProcessPartDescription {
         } else {
             return widget;
         }
+    }
+
+    public ResourceUrn getResourceUrn() {
+        return resourceUrn;
     }
 }
 
