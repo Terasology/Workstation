@@ -25,7 +25,6 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.InventoryManager;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.registry.CoreRegistry;
-import org.terasology.rendering.nui.layouts.FlowLayout;
 import org.terasology.workstation.process.DescribeProcess;
 import org.terasology.workstation.process.ErrorCheckingProcessPart;
 import org.terasology.workstation.process.InvalidProcessPartException;
@@ -152,7 +151,6 @@ public abstract class InventoryInputComponent implements Component, ProcessPart,
     public Collection<ProcessPartDescription> getInputDescriptions() {
         List<ProcessPartDescription> descriptions = Lists.newLinkedList();
         Set<EntityRef> items = createItems();
-        FlowLayout flowLayout = new FlowLayout();
         try {
             for (EntityRef item : items) {
                 descriptions.add(InventoryOutputComponent.createProcessPartDescription(item));

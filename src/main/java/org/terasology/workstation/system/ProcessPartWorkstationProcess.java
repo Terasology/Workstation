@@ -17,7 +17,6 @@ package org.terasology.workstation.system;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.terasology.asset.Assets;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
@@ -39,12 +38,10 @@ import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 import org.terasology.workstation.process.inventory.ValidateInventoryItem;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
     private String id;
@@ -64,22 +61,23 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
             Iterables.addAll(allProcessParts, Iterables.filter(processTypePrefab.get().iterateComponents(), ProcessPart.class));
         }
 
-        // order the process parts
-        Collections.sort(allProcessParts, new Comparator<ProcessPart>() {
+        allProcessParts.sort(new Comparator<ProcessPart>() {
             @Override
-            public int compare(ProcessPart o1, ProcessPart o2) {
-                int order1 = 0;
-                int order2 = 0;
-
-                if (o1 instanceof ProcessPartOrdering) {
-                    order1 = ((ProcessPartOrdering) o1).getSortOrder();
+            public int compare(ProcessPart lhs, ProcessPart rhs) {
+                Integer lhsOrder = 0;
+                Integer rhsOrder = 0;
+                if (lhs instanceof ProcessPartOrdering) {
+                    lhsOrder = ((ProcessPartOrdering) lhs).getSortOrder();
+                }
+                if (rhs instanceof ProcessPartOrdering) {
+                    rhsOrder = ((ProcessPartOrdering) rhs).getSortOrder();
                 }
 
-                if (o2 instanceof ProcessPartOrdering) {
-                    order2 = ((ProcessPartOrdering) o2).getSortOrder();
+                if (!lhsOrder.equals(rhsOrder)) {
+                    return lhsOrder.compareTo(rhsOrder);
                 }
 
-                return Integer.compare(order1, order2);
+                return lhs.getClass().getName().compareTo(rhs.getClass().getName());
             }
         });
 
@@ -219,21 +217,24 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public Collection<ProcessPartDescription> getOutputDescriptions() {
-        Set<ProcessPartDescription> descriptions = Sets.newHashSet();
+        List<ProcessPartDescription> descriptions = Lists.newLinkedList();
         for (ProcessPart part : processParts) {
             if (part instanceof DescribeProcess) {
-                descriptions.addAll(((DescribeProcess) part).getOutputDescriptions());
+                List<ProcessPartDescription> sortedDescriptions = Lists.newLinkedList(((DescribeProcess) part).getOutputDescriptions());
+                sortedDescriptions.sort((lhs, rhs) -> lhs.toString().compareTo(rhs.toString()));
+                descriptions.addAll(sortedDescriptions);
             }
         }
         return descriptions;
     }
-
     @Override
     public Collection<ProcessPartDescription> getInputDescriptions() {
-        Set<ProcessPartDescription> descriptions = Sets.newHashSet();
+        List<ProcessPartDescription> descriptions = Lists.newLinkedList();
         for (ProcessPart part : processParts) {
             if (part instanceof DescribeProcess) {
-                descriptions.addAll(((DescribeProcess) part).getInputDescriptions());
+                List<ProcessPartDescription> sortedDescriptions = Lists.newLinkedList(((DescribeProcess) part).getInputDescriptions());
+                sortedDescriptions.sort((lhs, rhs) -> lhs.toString().compareTo(rhs.toString()));
+                descriptions.addAll(sortedDescriptions);
             }
         }
         return descriptions;
