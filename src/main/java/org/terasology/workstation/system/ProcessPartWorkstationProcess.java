@@ -24,6 +24,7 @@ import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
+import org.terasology.workstation.component.ProcessTypeDescriptionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.DescribeProcess;
 import org.terasology.workstation.process.ErrorCheckingProcessPart;
@@ -46,12 +47,15 @@ import java.util.Optional;
 public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
     private String id;
     private ProcessDefinitionComponent processDefinitionComponent;
+    private String processTypeName;
     private List<ProcessPart> processParts = new LinkedList<>();
+
 
     ProcessPartWorkstationProcess(Prefab prefab) throws InvalidProcessPartException {
         id = "Prefab:" + prefab.getUrn().toString();
-
         processDefinitionComponent = prefab.getComponent(ProcessDefinitionComponent.class);
+        processTypeName = prefab.getUrn().toString();
+
 
         List<ProcessPart> allProcessParts = Lists.newArrayList(Iterables.filter(prefab.iterateComponents(), ProcessPart.class));
 
@@ -59,6 +63,10 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         Optional<Prefab> processTypePrefab = Assets.getPrefab(processDefinitionComponent.processType);
         if (processTypePrefab.isPresent()) {
             Iterables.addAll(allProcessParts, Iterables.filter(processTypePrefab.get().iterateComponents(), ProcessPart.class));
+            ProcessTypeDescriptionComponent processTypeDescriptionComponent = processTypePrefab.get().getComponent(ProcessTypeDescriptionComponent.class);
+            if (processTypeDescriptionComponent != null) {
+                processTypeName = processTypeDescriptionComponent.name;
+            }
         }
 
         allProcessParts.sort(new Comparator<ProcessPart>() {
@@ -171,6 +179,11 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     @Override
+    public String getProcessTypeName() {
+        return processTypeName;
+    }
+
+    @Override
     public String getId() {
         return id;
     }
@@ -227,6 +240,7 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         }
         return descriptions;
     }
+
     @Override
     public Collection<ProcessPartDescription> getInputDescriptions() {
         List<ProcessPartDescription> descriptions = Lists.newLinkedList();

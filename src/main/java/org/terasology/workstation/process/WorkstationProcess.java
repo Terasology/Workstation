@@ -23,6 +23,10 @@ public interface WorkstationProcess {
 
     String getProcessType();
 
+    default String getProcessTypeName() {
+        return getProcessType();
+    }
+
     long startProcessingAutomatic(EntityRef workstation, EntityRef processEntity) throws InvalidProcessException;
 
     long startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcessRequest request, EntityRef processEntity) throws InvalidProcessException;
