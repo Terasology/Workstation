@@ -17,7 +17,7 @@ package org.terasology.workstation.system;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.terasology.asset.Assets;
+import org.terasology.utilities.Assets;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;

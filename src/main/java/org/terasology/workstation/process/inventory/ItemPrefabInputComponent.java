@@ -16,7 +16,7 @@
 package org.terasology.workstation.process.inventory;
 
 import com.google.common.base.Predicate;
-import org.terasology.asset.Assets;
+import org.terasology.utilities.Assets;
 import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.logic.inventory.ItemComponent;
