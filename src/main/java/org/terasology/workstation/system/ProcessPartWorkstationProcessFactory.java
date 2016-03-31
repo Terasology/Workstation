@@ -16,20 +16,22 @@
 package org.terasology.workstation.system;
 
 import org.slf4j.LoggerFactory;
+import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.registry.In;
 import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.WorkstationProcess;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
-public class DefaultWorkstationProcessFactory implements WorkstationProcessFactory {
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(DefaultWorkstationProcessFactory.class);
+public class ProcessPartWorkstationProcessFactory implements WorkstationProcessFactory {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ProcessPartWorkstationProcessFactory.class);
+
+    @In
+    private EntityManager entityManager;
 
     @Override
     public WorkstationProcess createProcess(Prefab prefab) {
         try {
-            WorkstationProcess process = new ProcessPartWorkstationProcess(prefab);
+            WorkstationProcess process = new ProcessPartWorkstationProcess(prefab, entityManager);
             return process;
         } catch (InvalidProcessPartException ex) {
             logger.warn("Invalid Process: " + prefab.getName() + ". " + ex.getMessage());

@@ -24,13 +24,16 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterMode;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.logic.delay.DelayManager;
 import org.terasology.logic.delay.DelayedActionTriggeredEvent;
 import org.terasology.monitoring.PerformanceMonitor;
+import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.event.WorkstationStateChanged;
+import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.world.block.BlockComponent;
 
@@ -46,6 +49,7 @@ import java.util.Map;
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class WorkstationAuthoritySystem extends BaseComponentSystem implements UpdateSubscriberSystem {
     private static final int AUTOMATIC_PROCESSING_REVIVAL_INTERVAL = 10000;
+    public static final String WORKSTATION_PROCESSING = "Workstation:Processing";
 
     @In
     private WorkstationRegistry workstationRegistry;
@@ -79,7 +83,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
         executingProcess = true;
         try {
             String actionId = event.getActionId();
-            if (actionId.equals(WorkstationUtils.WORKSTATION_PROCESSING)) {
+            if (actionId.equals(WORKSTATION_PROCESSING)) {
                 long gameTime = time.getGameTimeInMs();
                 Map<String, WorkstationProcessingComponent.ProcessDef> processesCopy = new HashMap<>(workstationProcessing.processes);
                 for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
@@ -87,7 +91,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
                     if (processDef.processingFinishTime <= gameTime) {
                         final WorkstationProcess workstationProcess = workstationRegistry.
                                 getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
-                        WorkstationUtils.finishProcessing(workstation, workstation, workstationProcess);
+                        finishProcessing(workstation, workstation, workstationProcess);
                     }
                 }
 
@@ -116,7 +120,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
                 if (workstationProcessing == null || !workstationProcessing.processes.containsKey(processType)) {
                     executingProcess = true;
                     try {
-                        WorkstationUtils.startProcessingManual(instigator, workstation, process, event, time.getGameTimeInMs());
+                        startProcessingManual(instigator, workstation, process, event, time.getGameTimeInMs());
                     } finally {
                         executingProcess = false;
                     }
@@ -178,7 +182,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
 
         for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(possibleProcesses.keySet())) {
             if (possibleProcesses.get(workstationProcess.getProcessType())) {
-                WorkstationUtils.startProcessingAutomatic(entity, workstationProcess, time.getGameTimeInMs());
+                startProcessingAutomatic(entity, workstationProcess, time.getGameTimeInMs());
             }
         }
     }
@@ -197,6 +201,113 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
                     entityRef.send(new WorkstationStateChanged());
                 }
             }
+        }
+    }
+
+    private void startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcess process,
+                                             WorkstationProcessRequest request, long gameTime) {
+        EntityRef processEntity = process.createProcessEntity();
+        if (processEntity == null) {
+            // create a blank process entity;
+            processEntity = entityManager.create();
+        }
+
+        try {
+            final long duration = process.startProcessingManual(instigator, workstation, request, processEntity);
+
+            WorkstationProcessingComponent.ProcessDef processDef = new WorkstationProcessingComponent.ProcessDef();
+            processDef.processingStartTime = gameTime;
+            processDef.processingFinishTime = gameTime + duration;
+            processDef.processingProcessId = process.getId();
+            processDef.processEntity = processEntity;
+
+            WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+            if (workstationProcessing == null) {
+                workstationProcessing = new WorkstationProcessingComponent();
+                workstationProcessing.processes.put(process.getProcessType(), processDef);
+                workstation.addComponent(workstationProcessing);
+            } else {
+                workstationProcessing.processes.put(process.getProcessType(), processDef);
+                workstation.saveComponent(workstationProcessing);
+            }
+
+            if (duration > 0) {
+                scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
+            } else {
+                finishProcessing(workstation, workstation, process, workstationProcessing);
+            }
+        } catch (InvalidProcessException exp) {
+            processEntity.destroy();
+        }
+    }
+
+    private void startProcessingAutomatic(EntityRef workstation, WorkstationProcess process, long gameTime) {
+        EntityRef processEntity = process.createProcessEntity();
+        if (processEntity == null) {
+            // create a blank process entity;
+            processEntity = entityManager.create();
+        }
+
+        try {
+            final long duration = process.startProcessingAutomatic(workstation, processEntity);
+
+            WorkstationProcessingComponent.ProcessDef processDef = new WorkstationProcessingComponent.ProcessDef();
+            processDef.processingStartTime = gameTime;
+            processDef.processingFinishTime = gameTime + duration;
+            processDef.processingProcessId = process.getId();
+            processDef.processEntity = processEntity;
+
+            WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+            if (workstationProcessing == null) {
+                workstationProcessing = new WorkstationProcessingComponent();
+                workstationProcessing.processes.put(process.getProcessType(), processDef);
+                workstation.addComponent(workstationProcessing);
+            } else {
+                workstationProcessing.processes.put(process.getProcessType(), processDef);
+                workstation.saveComponent(workstationProcessing);
+            }
+
+            if (duration > 0) {
+                scheduleWorkstationWakeUpIfNecessary(workstation, gameTime);
+            } else {
+                finishProcessing(workstation, workstation, process, workstationProcessing);
+            }
+        } catch (InvalidProcessException exp) {
+            processEntity.destroy();
+        }
+    }
+
+    private static void finishProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process, WorkstationProcessingComponent workstationProcessing) {
+        final WorkstationProcessingComponent.ProcessDef processDef = workstationProcessing.processes.remove(process.getProcessType());
+
+        if (workstationProcessing.processes.size() > 0) {
+            workstation.saveComponent(workstationProcessing);
+        } else {
+            workstation.removeComponent(WorkstationProcessingComponent.class);
+        }
+
+        process.finishProcessing(instigator, workstation, processDef.processEntity);
+
+        processDef.processEntity.destroy();
+    }
+
+    private void finishProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process) {
+        finishProcessing(instigator, workstation, process, workstation.getComponent(WorkstationProcessingComponent.class));
+    }
+
+    private void scheduleWorkstationWakeUpIfNecessary(EntityRef workstation, long currentTime) {
+        WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+        if (workstationProcessing != null) {
+            long minEndTime = Long.MAX_VALUE;
+            for (WorkstationProcessingComponent.ProcessDef processDef : workstationProcessing.processes.values()) {
+                minEndTime = Math.min(minEndTime, processDef.processingFinishTime);
+            }
+            final DelayManager delayManager = CoreRegistry.get(DelayManager.class);
+
+            if (delayManager.hasDelayedAction(workstation, WORKSTATION_PROCESSING)) {
+                delayManager.cancelDelayedAction(workstation, WORKSTATION_PROCESSING);
+            }
+            delayManager.addDelayedAction(workstation, WORKSTATION_PROCESSING, minEndTime - currentTime);
         }
     }
 }

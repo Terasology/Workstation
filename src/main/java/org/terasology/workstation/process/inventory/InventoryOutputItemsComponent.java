@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2016 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.workstation.process.fluid;
+package org.terasology.workstation.process.inventory;
 
+import com.google.common.collect.Sets;
 import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.entity.EntityRef;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
-public class FillFluidInventoryPart implements Component {
+import java.util.Set;
+
+
+public class InventoryOutputItemsComponent implements Component {
+    Set<EntityRef> outputItems = Sets.newHashSet();
+
+    public InventoryOutputItemsComponent() {
+    }
+
+    public InventoryOutputItemsComponent(Set<EntityRef> outputItems) {
+        this.outputItems = outputItems;
+    }
+
+    public Set<EntityRef> getOutputItems() {
+        return outputItems;
+    }
 }

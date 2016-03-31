@@ -32,4 +32,9 @@ public interface WorkstationProcess {
     long startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcessRequest request, EntityRef processEntity) throws InvalidProcessException;
 
     void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity);
+
+    // allow a WorkstationProcess to override the default blank entity creation with something fancier
+    default EntityRef createProcessEntity() {
+        return null;
+    }
 }

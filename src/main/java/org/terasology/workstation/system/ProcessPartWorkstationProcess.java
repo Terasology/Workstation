@@ -15,162 +15,98 @@
  */
 package org.terasology.workstation.system;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.terasology.utilities.Assets;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.registry.CoreRegistry;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
-import org.terasology.workstation.component.ProcessTypeDescriptionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.DescribeProcess;
-import org.terasology.workstation.process.ErrorCheckingProcessPart;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.InvalidProcessPartException;
-import org.terasology.workstation.process.ProcessPart;
 import org.terasology.workstation.process.ProcessPartDescription;
-import org.terasology.workstation.process.ProcessPartOrdering;
 import org.terasology.workstation.process.ValidateProcess;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
-import org.terasology.workstation.process.inventory.ValidateInventoryItem;
+import org.terasology.workstation.processPart.ProcessEntityFinishExecutionEvent;
+import org.terasology.workstation.processPart.ProcessEntityGetDurationEvent;
+import org.terasology.workstation.processPart.ProcessEntityIsInvalidEvent;
+import org.terasology.workstation.processPart.ProcessEntityIsInvalidToStartEvent;
+import org.terasology.workstation.processPart.ProcessEntityStartExecutionEvent;
+import org.terasology.workstation.processPart.inventory.ProcessEntityIsInvalidForFluidEvent;
+import org.terasology.workstation.processPart.inventory.ProcessEntityIsInvalidForInventoryItemEvent;
+import org.terasology.workstation.processPart.metadata.ProcessEntityGetInputDescriptionEvent;
+import org.terasology.workstation.processPart.metadata.ProcessEntityGetOutputDescriptionEvent;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
 
+/**
+ * Order of events for the most simple processing path:
+ * - ProcessEntityIsInvalidEvent (this happens once when loaded)
+ * -
+ */
 public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
     private String id;
     private ProcessDefinitionComponent processDefinitionComponent;
     private String processTypeName;
-    private List<ProcessPart> processParts = new LinkedList<>();
+    private Prefab prefab;
 
+    private EntityManager entityManager;
 
-    ProcessPartWorkstationProcess(Prefab prefab) throws InvalidProcessPartException {
+    ProcessPartWorkstationProcess(Prefab prefab, EntityManager entityManager) throws InvalidProcessPartException {
+        this.entityManager = entityManager;
+        this.prefab = prefab;
         id = "Prefab:" + prefab.getUrn().toString();
         processDefinitionComponent = prefab.getComponent(ProcessDefinitionComponent.class);
         processTypeName = prefab.getUrn().toString();
 
+        EntityRef tempProcessEntity = createProcessEntity(false);
+        ProcessEntityIsInvalidEvent processEntityIsInvalidEvent = new ProcessEntityIsInvalidEvent();
+        tempProcessEntity.send(processEntityIsInvalidEvent);
+        tempProcessEntity.destroy();
 
-        List<ProcessPart> allProcessParts = Lists.newArrayList(Iterables.filter(prefab.iterateComponents(), ProcessPart.class));
-
-        // get any process parts from the process type prefab
-        Optional<Prefab> processTypePrefab = Assets.getPrefab(processDefinitionComponent.processType);
-        if (processTypePrefab.isPresent()) {
-            Iterables.addAll(allProcessParts, Iterables.filter(processTypePrefab.get().iterateComponents(), ProcessPart.class));
-            ProcessTypeDescriptionComponent processTypeDescriptionComponent = processTypePrefab.get().getComponent(ProcessTypeDescriptionComponent.class);
-            if (processTypeDescriptionComponent != null) {
-                processTypeName = processTypeDescriptionComponent.name;
-            }
-        }
-
-        allProcessParts.sort(new Comparator<ProcessPart>() {
-            @Override
-            public int compare(ProcessPart lhs, ProcessPart rhs) {
-                Integer lhsOrder = 0;
-                Integer rhsOrder = 0;
-                if (lhs instanceof ProcessPartOrdering) {
-                    lhsOrder = ((ProcessPartOrdering) lhs).getSortOrder();
-                }
-                if (rhs instanceof ProcessPartOrdering) {
-                    rhsOrder = ((ProcessPartOrdering) rhs).getSortOrder();
-                }
-
-                if (!lhsOrder.equals(rhsOrder)) {
-                    return lhsOrder.compareTo(rhsOrder);
-                }
-
-                return lhs.getClass().getName().compareTo(rhs.getClass().getName());
-            }
-        });
-
-        // only add process parts that pass error checking
-        for (ProcessPart component : allProcessParts) {
-            if (component instanceof ErrorCheckingProcessPart) {
-                ErrorCheckingProcessPart errorChecking = (ErrorCheckingProcessPart) component;
-                errorChecking.checkForErrors();
-            }
-            processParts.add(component);
+        if (processEntityIsInvalidEvent.hasErrors()) {
+            throw new InvalidProcessPartException(String.join(System.lineSeparator(), processEntityIsInvalidEvent.getErrors()));
         }
     }
 
     @Override
-    public boolean isResponsibleForSlot(EntityRef workstation, int slotNo) {
-        for (ProcessPart processPart : processParts) {
-            if (processPart instanceof ValidateInventoryItem) {
-                if (((ValidateInventoryItem) processPart).isResponsibleForSlot(workstation, slotNo)) {
-                    return true;
-                }
-            }
-        }
+    public EntityRef createProcessEntity() {
+        return createProcessEntity(true);
+    }
 
-        return false;
+    private EntityRef createProcessEntity(boolean persistant) {
+        EntityBuilder builder = entityManager.newBuilder(prefab);
+        builder.setPersistent(persistant);
+        return builder.build();
     }
 
     @Override
     public boolean isValid(EntityRef workstation, int slotNo, EntityRef instigator, EntityRef item) {
-        for (ProcessPart processPart : processParts) {
-            if (processPart instanceof ValidateInventoryItem) {
-                final ValidateInventoryItem validateInventory = (ValidateInventoryItem) processPart;
-                if (validateInventory.isResponsibleForSlot(workstation, slotNo)) {
-                    if (validateInventory.isValid(workstation, slotNo, instigator, item)) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
+        ProcessEntityIsInvalidForInventoryItemEvent event = new ProcessEntityIsInvalidForInventoryItemEvent(workstation, slotNo, instigator, item);
+        EntityRef tempProcessEntity = createProcessEntity(false);
+        tempProcessEntity.send(event);
+        tempProcessEntity.destroy();
+        return !event.isConsumed();
     }
 
     @Override
     public boolean isValid(EntityRef instigator, EntityRef workstation) {
-        EntityManager entityManager = CoreRegistry.get(EntityManager.class);
-        EntityBuilder tempEntityBuilder = entityManager.newBuilder();
-        tempEntityBuilder.setPersistent(false);
-        EntityRef tempEntity = tempEntityBuilder.build();
-        tempEntity.addComponent(processDefinitionComponent);
-        for (ProcessPart part : processParts) {
-            if (!part.validateBeforeStart(instigator, workstation, tempEntity)) {
-                return false;
-            }
-        }
-        tempEntity.destroy();
-        return true;
-    }
-
-    @Override
-    public boolean isResponsibleForFluidSlot(EntityRef workstation, int slotNo) {
-        for (ProcessPart processPart : processParts) {
-            if (processPart instanceof ValidateFluidInventoryItem) {
-                if (((ValidateFluidInventoryItem) processPart).isResponsibleForFluidSlot(workstation, slotNo)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        ProcessEntityIsInvalidToStartEvent event = new ProcessEntityIsInvalidToStartEvent(instigator, workstation);
+        EntityRef tempProcessEntity = createProcessEntity(false);
+        tempProcessEntity.send(event);
+        tempProcessEntity.destroy();
+        return !event.isConsumed();
     }
 
     @Override
     public boolean isValidFluid(EntityRef workstation, int slotNo, EntityRef instigator, String fluidType) {
-        for (ProcessPart processPart : processParts) {
-            if (processPart instanceof ValidateFluidInventoryItem) {
-                final ValidateFluidInventoryItem validateInventory = (ValidateFluidInventoryItem) processPart;
-                if (validateInventory.isResponsibleForFluidSlot(workstation, slotNo)) {
-                    if (validateInventory.isValidFluid(workstation, slotNo, instigator, fluidType)) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
+        ProcessEntityIsInvalidForFluidEvent event = new ProcessEntityIsInvalidForFluidEvent(workstation, slotNo, instigator, fluidType);
+        EntityRef tempProcessEntity = createProcessEntity(false);
+        tempProcessEntity.send(event);
+        tempProcessEntity.destroy();
+        return !event.isConsumed();
     }
 
     @Override
@@ -201,56 +137,46 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     private long startProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) throws InvalidProcessException {
-        processEntity.addComponent(processDefinitionComponent);
-
-        for (ProcessPart processPart : processParts) {
-            if (!processPart.validateBeforeStart(instigator, workstation, processEntity)) {
-                throw new InvalidProcessException();
-            }
+        // Is the process entity valid to execute?
+        ProcessEntityIsInvalidToStartEvent event = new ProcessEntityIsInvalidToStartEvent(instigator, workstation);
+        processEntity.send(event);
+        if (event.isConsumed()) {
+            throw new InvalidProcessException();
         }
 
-        long duration = 0;
-        for (ProcessPart processPart : processParts) {
-            duration += processPart.getDuration(instigator, workstation, processEntity);
-        }
+        // Execute the process!
+        ProcessEntityStartExecutionEvent processEntityStartExecutionEvent = new ProcessEntityStartExecutionEvent(instigator, workstation);
+        processEntity.send(processEntityStartExecutionEvent);
 
-        for (ProcessPart processPart : processParts) {
-            processPart.executeStart(instigator, workstation, processEntity);
-        }
+        // How long does this process take before calling finish?
+        ProcessEntityGetDurationEvent durationEvent = new ProcessEntityGetDurationEvent(0f, workstation, instigator);
+        processEntity.send(durationEvent);
 
-        return duration;
+        return (long) (durationEvent.getResultValue() * 1000f);
     }
 
     @Override
     public void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
-        for (ProcessPart processPart : processParts) {
-            processPart.executeEnd(instigator, workstation, processEntity);
-        }
+        // Finish processing, hopefully generating the desired results
+        ProcessEntityFinishExecutionEvent processEntityFinishExecutionEvent = new ProcessEntityFinishExecutionEvent(instigator, workstation);
+        processEntity.send(processEntityFinishExecutionEvent);
     }
 
     @Override
     public Collection<ProcessPartDescription> getOutputDescriptions() {
-        List<ProcessPartDescription> descriptions = Lists.newLinkedList();
-        for (ProcessPart part : processParts) {
-            if (part instanceof DescribeProcess) {
-                List<ProcessPartDescription> sortedDescriptions = Lists.newLinkedList(((DescribeProcess) part).getOutputDescriptions());
-                sortedDescriptions.sort((lhs, rhs) -> lhs.toString().compareTo(rhs.toString()));
-                descriptions.addAll(sortedDescriptions);
-            }
-        }
-        return descriptions;
+        ProcessEntityGetOutputDescriptionEvent event = new ProcessEntityGetOutputDescriptionEvent();
+        EntityRef tempProcessEntity = createProcessEntity(false);
+        tempProcessEntity.send(event);
+        tempProcessEntity.destroy();
+        return Lists.newLinkedList(event.getOutputDescriptions());
     }
 
     @Override
     public Collection<ProcessPartDescription> getInputDescriptions() {
-        List<ProcessPartDescription> descriptions = Lists.newLinkedList();
-        for (ProcessPart part : processParts) {
-            if (part instanceof DescribeProcess) {
-                List<ProcessPartDescription> sortedDescriptions = Lists.newLinkedList(((DescribeProcess) part).getInputDescriptions());
-                sortedDescriptions.sort((lhs, rhs) -> lhs.toString().compareTo(rhs.toString()));
-                descriptions.addAll(sortedDescriptions);
-            }
-        }
-        return descriptions;
+        ProcessEntityGetInputDescriptionEvent event = new ProcessEntityGetInputDescriptionEvent();
+        EntityRef tempProcessEntity = createProcessEntity(false);
+        tempProcessEntity.send(event);
+        tempProcessEntity.destroy();
+        return Lists.newLinkedList(event.getInputDescriptions());
     }
 }

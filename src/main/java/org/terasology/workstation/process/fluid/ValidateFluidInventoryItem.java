@@ -18,7 +18,5 @@ package org.terasology.workstation.process.fluid;
 import org.terasology.entitySystem.entity.EntityRef;
 
 public interface ValidateFluidInventoryItem {
-    boolean isResponsibleForFluidSlot(EntityRef workstation, int slotNo);
-
     boolean isValidFluid(EntityRef workstation, int slotNo, EntityRef instigator, String fluidType);
 }

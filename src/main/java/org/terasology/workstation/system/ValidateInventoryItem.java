@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2016 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.workstation.process.inventory;
+package org.terasology.workstation.system;
 
 import org.terasology.entitySystem.entity.EntityRef;
 
@@ -21,7 +21,5 @@ import org.terasology.entitySystem.entity.EntityRef;
  * @author Marcin Sciesinski <marcins78@gmail.com>
  */
 public interface ValidateInventoryItem {
-    boolean isResponsibleForSlot(EntityRef workstation, int slotNo);
-
     boolean isValid(EntityRef workstation, int slotNo, EntityRef instigator, EntityRef item);
 }

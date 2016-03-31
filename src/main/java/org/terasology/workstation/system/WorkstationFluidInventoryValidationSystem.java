@@ -43,11 +43,9 @@ public class WorkstationFluidInventoryValidationSystem extends BaseComponentSyst
         for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(workstation.supportedProcessTypes.keySet())) {
             if (workstationProcess instanceof ValidateFluidInventoryItem) {
                 ValidateFluidInventoryItem inventoryValidator = (ValidateFluidInventoryItem) workstationProcess;
-                if (inventoryValidator.isResponsibleForFluidSlot(entity, slot)) {
-                    hasValidation = true;
-                    if (inventoryValidator.isValidFluid(entity, slot, event.getInstigator(), event.getFluidType())) {
-                        return;
-                    }
+                hasValidation = true;
+                if (inventoryValidator.isValidFluid(entity, slot, event.getInstigator(), event.getFluidType())) {
+                    return;
                 }
             }
         }

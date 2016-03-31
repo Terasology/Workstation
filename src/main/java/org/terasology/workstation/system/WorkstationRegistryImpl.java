@@ -19,7 +19,9 @@ import org.terasology.entitySystem.prefab.Prefab;
 import org.terasology.entitySystem.prefab.PrefabManager;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.registry.CoreRegistry;
+import org.terasology.logic.console.commandSystem.annotations.Command;
+import org.terasology.registry.In;
+import org.terasology.registry.InjectionHelper;
 import org.terasology.registry.Share;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.process.WorkstationProcess;
@@ -37,6 +39,9 @@ import java.util.Set;
 @RegisterSystem
 @Share(WorkstationRegistry.class)
 public class WorkstationRegistryImpl extends BaseComponentSystem implements WorkstationRegistry {
+    @In
+    PrefabManager prefabManager;
+
     private Set<String> scannedTypes = new HashSet<>();
 
     private Map<String, Map<String, WorkstationProcess>> workstationProcesses = new LinkedHashMap<>();
@@ -51,7 +56,7 @@ public class WorkstationRegistryImpl extends BaseComponentSystem implements Work
         Map<String, WorkstationProcess> processes = new LinkedHashMap<>();
         for (String processType : processTypes) {
             if (!scannedTypes.contains(processType)) {
-                registerProcesses(processType, new DefaultWorkstationProcessFactory());
+                registerProcesses(processType, new ProcessPartWorkstationProcessFactory());
             }
             processes.putAll(workstationProcesses.get(processType));
         }
@@ -80,11 +85,11 @@ public class WorkstationRegistryImpl extends BaseComponentSystem implements Work
     }
 
     private void registerProcesses(String processType, WorkstationProcessFactory factory) {
+        InjectionHelper.inject(factory);
         Map<String, WorkstationProcess> processes = new HashMap<>();
         if (workstationProcesses.containsKey(processType)) {
             processes.putAll(workstationProcesses.get(processType));
         }
-        PrefabManager prefabManager = CoreRegistry.get(PrefabManager.class);
 
         for (Prefab prefab : prefabManager.listPrefabs(ProcessDefinitionComponent.class)) {
             ProcessDefinitionComponent processDef = prefab.getComponent(ProcessDefinitionComponent.class);
@@ -98,4 +103,12 @@ public class WorkstationRegistryImpl extends BaseComponentSystem implements Work
         workstationProcesses.put(processType, processes);
         scannedTypes.add(processType);
     }
+
+    @Command(shortDescription = "Reset all workstation processes")
+    public String resetWorkstationProcesses() {
+        scannedTypes.clear();
+        workstationProcesses.clear();
+        return "All known processes cleared";
+    }
+
 }

@@ -23,6 +23,7 @@ import java.util.Map;
 public class InventoryInputProcessPartSlotAmountsComponent implements Component {
     public Map<Integer, Integer> slotAmounts = Maps.newHashMap();
 
+
     public InventoryInputProcessPartSlotAmountsComponent() {
     }
 

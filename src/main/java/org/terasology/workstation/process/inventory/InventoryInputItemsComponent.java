@@ -13,8 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terasology.workstation.process;
+package org.terasology.workstation.process.inventory;
 
-public interface ErrorCheckingProcessPart {
-    void checkForErrors() throws InvalidProcessPartException;
+import com.google.common.collect.Lists;
+import org.terasology.entitySystem.Component;
+import org.terasology.entitySystem.Owns;
+import org.terasology.entitySystem.entity.EntityRef;
+
+import java.util.List;
+
+public class InventoryInputItemsComponent implements Component {
+    @Owns
+    public List<EntityRef> items = Lists.newArrayList();
+
+    public InventoryInputItemsComponent() {
+    }
+
+    public InventoryInputItemsComponent(Iterable<EntityRef> items) {
+        this.items = Lists.newArrayList(items);
+    }
 }
