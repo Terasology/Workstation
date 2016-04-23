@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.entitySystem.event.EventPriority;
 import org.terasology.entitySystem.event.ReceiveEvent;
 import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
@@ -69,7 +70,7 @@ public class InventoryOutputProcessPartCommonSystem extends BaseComponentSystem 
         }
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
     public void validateToStartExecution(ProcessEntityIsInvalidToStartEvent event, EntityRef processEntity,
                                          InventoryOutputComponent inventoryOutputComponent) {
         Set<EntityRef> outputItems = InventoryProcessPartUtils.createItems(inventoryOutputComponent.blockCounts, inventoryOutputComponent.itemCounts, false, entityManager, blockManager);
@@ -81,7 +82,7 @@ public class InventoryOutputProcessPartCommonSystem extends BaseComponentSystem 
         processEntity.removeComponent(InventoryOutputItemsComponent.class);
     }
 
-    @ReceiveEvent
+    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
     public void finish(ProcessEntityFinishExecutionEvent event, EntityRef processEntity,
                        InventoryOutputComponent inventoryOutputComponent) {
         Set<EntityRef> outputItems = InventoryProcessPartUtils.createItems(inventoryOutputComponent.blockCounts, inventoryOutputComponent.itemCounts, true, entityManager, blockManager);
