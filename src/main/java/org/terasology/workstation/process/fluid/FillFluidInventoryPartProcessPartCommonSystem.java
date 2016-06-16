@@ -43,6 +43,8 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     @In
     FluidManager fluidManager;
 
+    public static final float DELTA = 0.001f;
+
     ///// Processing
 
     @ReceiveEvent
@@ -68,16 +70,21 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
 
         EntityRef containerItem = InventoryUtils.getItemAt(event.getWorkstation(), inputSlot.slot);
         FluidContainerItemComponent fluidContainer = containerItem.getComponent(FluidContainerItemComponent.class);
+        boolean transferredFromHolder = false; // Indicate whether addFluidFromHolder (true) or addFluid (false) was used.
 
         for (int fluidSlot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_INPUT")) {
-            if (fluidManager.addFluid(event.getInstigator(), event.getWorkstation(), fluidSlot, fluidContainer.fluidType, fluidContainer.volume)) {
+            if (fluidManager.addFluidFromHolder(event.getInstigator(), event.getWorkstation(), containerItem, fluidSlot, fluidContainer.fluidType, fluidContainer.volume)) {
+                transferredFromHolder = true;
                 break;
             }
         }
 
         final EntityRef removedItem = CoreRegistry.get(InventoryManager.class).removeItem(event.getWorkstation(), event.getInstigator(), containerItem, false, 1);
         if (removedItem != null) {
-            FluidUtils.setFluidForContainerItem(removedItem, null);
+            // Don't set the fluid to null unless it's empty or it has not been transferred.
+            if (!transferredFromHolder || fluidContainer.volume <= DELTA) {
+                FluidUtils.setFluidForContainerItem(removedItem, null);
+            }
 
             if (CoreRegistry.get(InventoryManager.class).giveItem(event.getWorkstation(), event.getInstigator(), removedItem,
                     WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_CONTAINER_OUTPUT"))) {
@@ -142,6 +149,8 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
             for (int fluidSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_INPUT")) {
                 FluidComponent fluid = fluidInventory.fluidSlots.get(fluidSlot).getComponent(FluidComponent.class);
                 Float maximumVolume = fluidInventory.maximumVolumes.get(fluidSlot);
+
+                // If all of the contents of the container can be stored in the fluid inventory.
                 if (canStoreContentsOfContainerInFluidSlot(fluidContainer, fluid, maximumVolume)) {
                     EntityRef tempEntity = containerItem.copy();
                     try {
@@ -157,13 +166,41 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
                         tempEntity.destroy();
                     }
                 }
+                // If some of the contents of the container can be stored in the fluid inventory.
+                else if (canPartiallyStoreContentsOfContainerInFluidSlot(fluidContainer, fluid, maximumVolume)) {
+                    EntityRef tempEntity = containerItem.copy();
+                    try {
+                        FluidContainerItemComponent fluidContainerCopy = tempEntity.getComponent(FluidContainerItemComponent.class);
+                        fluidContainerCopy.volume = Math.max(0f, fluidContainerCopy.volume - (maximumVolume - fluid.volume));
+
+                        if (fluidContainerCopy.volume <= DELTA) {
+                            fluidContainerCopy.fluidType = null;
+                        }
+
+                        for (int containerOutputSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_OUTPUT")) {
+                            EntityRef outputItem = InventoryUtils.getItemAt(workstation, containerOutputSlot);
+                            if (InventoryUtils.canStackInto(tempEntity, outputItem)) {
+                                return true;
+                            }
+                        }
+                    } finally {
+                        tempEntity.destroy();
+                    }
+                }
             }
         }
         return false;
     }
 
+    // Check to see if we can store the entire volume of the fluid container plus pre-existing fluid in this fluid slot.
     private boolean canStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer, FluidComponent fluid, float maximumVolume) {
         return (fluid == null && fluidContainer.volume <= maximumVolume)
                 || (fluid != null && fluid.fluidType.equals(fluidContainer.fluidType) && fluidContainer.volume + fluid.volume <= maximumVolume);
+    }
+
+    // Check to see if we can partially store the some of the volume of the fluid container in this fluid slot.
+    private boolean canPartiallyStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer, FluidComponent fluid, float maximumVolume) {
+        return (fluid == null && fluidContainer.volume <= maximumVolume)
+                || (fluid != null && fluid.fluidType.equals(fluidContainer.fluidType) && fluidContainer.volume > 0 && fluid.volume < maximumVolume);
     }
 }
