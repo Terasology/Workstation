@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 MovingBlocks
+ * Copyright 2016 MovingBlocks
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 @RegisterSystem(RegisterMode.AUTHORITY)
 public class WorkstationAuthoritySystem extends BaseComponentSystem implements UpdateSubscriberSystem {
-    private static final int AUTOMATIC_PROCESSING_REVIVAL_INTERVAL = 10000;
     public static final String WORKSTATION_PROCESSING = "Workstation:Processing";
+
+    private static final int AUTOMATIC_PROCESSING_REVIVAL_INTERVAL = 10000;
 
     @In
     private WorkstationRegistry workstationRegistry;
@@ -83,20 +81,19 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
         executingProcess = true;
         try {
             String actionId = event.getActionId();
-            //if (actionId.equals(WORKSTATION_PROCESSING)) {
                 long gameTime = time.getGameTimeInMs();
                 Map<String, WorkstationProcessingComponent.ProcessDef> processesCopy = new HashMap<>(workstationProcessing.processes);
                 for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
                     WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
                     if (processDef.processingFinishTime <= gameTime) {
-                        final WorkstationProcess workstationProcess = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
+                        final WorkstationProcess workstationProcess = workstationRegistry.getWorkstationProcessById(
+                                workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
                         finishProcessing(workstation, workstation, workstationProcess);
                     }
                 }
 
                 pendingWorkstationChecks.add(workstation);
                 processPendingChecks();
-            //}
         } finally {
             executingProcess = false;
             PerformanceMonitor.endActivity();
@@ -300,18 +297,6 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
         if (workstationProcessing != null) {
             long endTime = Long.MAX_VALUE;
 
-            /*
-            for (WorkstationProcessingComponent.ProcessDef processDef : workstationProcessing.processes.values()) {
-                minEndTime = Math.min(minEndTime, processDef.processingFinishTime);
-            }
-            final DelayManager delayManager = CoreRegistry.get(DelayManager.class);
-
-            if (delayManager.hasDelayedAction(workstation, WORKSTATION_PROCESSING)) {
-                delayManager.cancelDelayedAction(workstation, WORKSTATION_PROCESSING);
-            }
-            delayManager.addDelayedAction(workstation, WORKSTATION_PROCESSING, minEndTime - currentTime);
-            */
-
             final DelayManager delayManager = CoreRegistry.get(DelayManager.class);
 
             // Schedule wake-ups for all processes in this Workstation. TODO: Perhaps it could be done more efficiently?
@@ -328,7 +313,6 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
                 }
 
                 // Add a delayed action pertaining to this workstation and action ID, and activate it after
-                // (endTime - currentTime) ms.
                 delayManager.addDelayedAction(workstation, fullActionID, endTime - currentTime);
             }
         }
