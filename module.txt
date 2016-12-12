@@ -1,9 +1,9 @@
 {
     "id" : "Workstation",
     "version" : "1.0.0-SNAPSHOT",
-    "author" : "Marcin Sciesinski <marcins78@gmail.com>, Josharias",
+    "author" : "Marcin Sciesinski <marcins78@gmail.com>, Josharias, Cervator, flo, xrtariq2594",
     "displayName" : "Workstation",
-    "description" : "",
+    "description" : "A module for generic workstation support",
     "dependencies" : [
             {
                 "id" : "Core",
