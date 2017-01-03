@@ -203,7 +203,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
     private void startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcess process,
                                              WorkstationProcessRequest request, long gameTime) {
         EntityRef processEntity = process.createProcessEntity();
-        if (processEntity == null) {
+        if (processEntity == null || processEntity == EntityRef.NULL) {
             // create a blank process entity;
             processEntity = entityManager.create();
         }
@@ -239,7 +239,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
 
     private void startProcessingAutomatic(EntityRef workstation, WorkstationProcess process, long gameTime) {
         EntityRef processEntity = process.createProcessEntity();
-        if (processEntity == null) {
+        if (processEntity == null || processEntity == EntityRef.NULL) {
             // create a blank process entity;
             processEntity = entityManager.create();
         }
