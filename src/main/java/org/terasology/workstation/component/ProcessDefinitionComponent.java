@@ -17,6 +17,14 @@ package org.terasology.workstation.component;
 
 import org.terasology.entitySystem.Component;
 
+/**
+ * Component that stores the definition of a workstation process. This definition contains the process type name, and
+ * the minimum process level necessary for doing this task.
+ */
 public class ProcessDefinitionComponent implements Component {
+    /** Type of the process. */
     public String processType;
+
+    /** Minimum level requirement of the process. */
+    public int processLevel;
 }

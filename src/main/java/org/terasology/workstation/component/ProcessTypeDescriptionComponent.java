@@ -19,4 +19,5 @@ import org.terasology.entitySystem.Component;
 
 public class ProcessTypeDescriptionComponent implements Component {
     public String name;
+    public int level;
 }

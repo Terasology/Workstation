@@ -23,12 +23,10 @@ import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.fluid.event.BeforeFluidPutInInventory;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
+import org.terasology.workstation.component.WorkstationProcessType;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 @RegisterSystem
 public class WorkstationFluidInventoryValidationSystem extends BaseComponentSystem {
     @In

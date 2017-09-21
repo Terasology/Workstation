@@ -23,11 +23,9 @@ import org.terasology.logic.inventory.InventoryComponent;
 import org.terasology.logic.inventory.events.BeforeItemPutInInventory;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
+import org.terasology.workstation.component.WorkstationProcessType;
 import org.terasology.workstation.process.WorkstationProcess;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 @RegisterSystem
 public class WorkstationInventoryValidationSystem extends BaseComponentSystem {
     @In

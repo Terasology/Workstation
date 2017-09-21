@@ -23,6 +23,8 @@ public interface WorkstationProcess {
 
     String getProcessType();
 
+    int getProcessLevel();
+
     default String getProcessTypeName() {
         return getProcessType();
     }

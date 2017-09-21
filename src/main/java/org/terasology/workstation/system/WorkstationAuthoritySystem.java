@@ -30,6 +30,7 @@ import org.terasology.monitoring.PerformanceMonitor;
 import org.terasology.registry.CoreRegistry;
 import org.terasology.registry.In;
 import org.terasology.workstation.component.WorkstationComponent;
+import org.terasology.workstation.component.WorkstationProcessType;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.event.WorkstationStateChanged;
@@ -37,6 +38,7 @@ import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.world.block.BlockComponent;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -159,7 +161,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
     }
 
     private void processIfHasPendingAutomaticProcesses(EntityRef entity, WorkstationComponent workstation) {
-        Map<String, Boolean> possibleProcesses = new LinkedHashMap<>(workstation.supportedProcessTypes);
+        Map<String, WorkstationProcessType> possibleProcesses = new LinkedHashMap<>(workstation.supportedProcessTypes);
 
         // Filter out those currently processing
         WorkstationProcessingComponent processing = entity.getComponent(WorkstationProcessingComponent.class);
@@ -169,15 +171,24 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
             }
         }
 
-        // Filter out non-automatic
-        for (Map.Entry<String, Boolean> processDef : workstation.supportedProcessTypes.entrySet()) {
-            if (!processDef.getValue()) {
+        // Filter out non-automatic processes.
+        for (Map.Entry<String, WorkstationProcessType> processDef : workstation.supportedProcessTypes.entrySet()) {
+            if (!processDef.getValue().isAutomatic) {
                 possibleProcesses.remove(processDef.getKey());
             }
         }
 
-        for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(possibleProcesses.keySet())) {
-            if (possibleProcesses.get(workstationProcess.getProcessType())) {
+        /*
+        // Filter out non-automatic processes.
+        for (Map.Entry<WorkstationProcessType, Boolean> processDef : workstation.supportedProcessTypes.entrySet()) {
+            if (!processDef.getValue()) {
+                possibleProcesses.remove(processDef.getKey());
+            }
+        }
+        */
+
+        for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(new ArrayList<WorkstationProcessType>(possibleProcesses.values()))) {
+            if (possibleProcesses.get(workstationProcess.getProcessType()) != null) { //TODO: Check again later after testing.
                 startProcessingAutomatic(entity, workstationProcess, time.getGameTimeInMs());
             }
         }

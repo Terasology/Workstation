@@ -22,8 +22,11 @@ import org.terasology.rendering.nui.Canvas;
 import org.terasology.rendering.nui.CoreWidget;
 import org.terasology.rendering.nui.layouts.ColumnLayout;
 import org.terasology.workstation.component.WorkstationComponent;
+import org.terasology.workstation.component.WorkstationProcessType;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.system.WorkstationRegistry;
+
+import java.util.ArrayList;
 
 /**
  * Lists processes related to the passed in workstation
@@ -54,7 +57,7 @@ public class ProcessListWidget extends CoreWidget implements WorkstationUI {
         WorkstationComponent workstationComponent = workstation.getComponent(WorkstationComponent.class);
 
         columnLayout = new ColumnLayout();
-        for (WorkstationProcess process : workstationRegistry.getWorkstationProcesses(workstationComponent.supportedProcessTypes.keySet())) {
+        for (WorkstationProcess process : workstationRegistry.getWorkstationProcesses(new ArrayList<WorkstationProcessType>(workstationComponent.supportedProcessTypes.values()))) {
             // add a description of each process to the layout
             columnLayout.addWidget(new ProcessSummaryWidget(process));
         }

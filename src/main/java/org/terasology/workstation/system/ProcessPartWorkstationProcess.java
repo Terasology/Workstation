@@ -115,6 +115,11 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     }
 
     @Override
+    public int getProcessLevel() {
+        return processDefinitionComponent.processLevel;
+    }
+
+    @Override
     public String getProcessTypeName() {
         return processTypeName;
     }

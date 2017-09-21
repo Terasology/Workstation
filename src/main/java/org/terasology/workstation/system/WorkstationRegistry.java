@@ -15,8 +15,10 @@
  */
 package org.terasology.workstation.system;
 
+import org.terasology.workstation.component.WorkstationProcessType;
 import org.terasology.workstation.process.WorkstationProcess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public interface WorkstationRegistry {
@@ -24,7 +26,15 @@ public interface WorkstationRegistry {
 
     void registerProcess(String processType, WorkstationProcess workstationProcess);
 
+    void registerProcess(String processType, int processLevel, WorkstationProcess workstationProcess);
+
     Collection<WorkstationProcess> getWorkstationProcesses(Collection<String> processType);
 
+    Collection<WorkstationProcess> getWorkstationProcesses(ArrayList<WorkstationProcessType> processTypes);
+
+    Collection<WorkstationProcess> getWorkstationProcessesByLevel(ArrayList<WorkstationProcessType> processTypes);
+
     WorkstationProcess getWorkstationProcessById(Collection<String> supportedProcessTypes, String processId);
+
+    WorkstationProcess getWorkstationProcessByIdAndLevel(ArrayList<WorkstationProcessType> supportedProcessTypes, String processId);
 }
