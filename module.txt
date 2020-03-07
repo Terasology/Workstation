@@ -5,7 +5,7 @@
     "displayName" : "Workstation",
     "description" : "",
     "dependencies" : [
-        {"id" : "Core", "minVersion" : "2.0.0"},
+        {"id" : "Core", "minVersion" : "3.0.0"},
         {"id" : "Fluid", "minVersion" : "1.0.0"}
     ],
     "isServerSideOnly" : false
