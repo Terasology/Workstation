@@ -172,7 +172,7 @@ public class FluidInputProcessPartCommonSystem extends BaseComponentSystem {
         for (Map.Entry<String, Float> fluidAmount : fluidInputComponent.fluidVolumes.entrySet()) {
             String fluidName = fluidAmount.getKey();
             FluidRenderer fluidRenderer = fluidRegistry.getFluidRenderer(fluidAmount.getKey());
-            if (fluidRenderer == null) {
+            if (fluidRenderer != null) {
                 fluidName = fluidRenderer.getFluidName();
             }
             event.addInputDescription(new ProcessPartDescription(new ResourceUrn(fluidAmount.getKey()), fluidAmount.getValue() + "mL " + fluidName));
