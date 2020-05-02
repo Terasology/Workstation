@@ -7,5 +7,6 @@
     "dependencies" : [
         {"id" : "Fluid", "minVersion" : "1.0.0"}
     ],
-    "isServerSideOnly" : false
+    "isServerSideOnly" : false,
+    "isAugmentation": true
 }
