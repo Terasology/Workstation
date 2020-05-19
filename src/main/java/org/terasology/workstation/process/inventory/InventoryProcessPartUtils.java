@@ -56,10 +56,15 @@ public abstract class InventoryProcessPartUtils {
         for (Map.Entry<String, Integer> itemCount : itemCounts.entrySet()) {
             EntityBuilder entityBuilder = entityManager.newBuilder(itemCount.getKey());
             entityBuilder.setPersistent(createPersistentEntities);
+
             ItemComponent item = entityBuilder.getComponent(ItemComponent.class);
-            item.stackCount = itemCount.getValue().byteValue();
-            entityBuilder.saveComponent(item);
-            result.add(entityBuilder.build());
+
+            // Only set the stack count if the ItemComponent exists.
+            if (item != null) {
+                item.stackCount = itemCount.getValue().byteValue();
+                entityBuilder.saveComponent(item);
+                result.add(entityBuilder.build());
+            }
         }
 
         return result;
