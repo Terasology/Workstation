@@ -129,7 +129,7 @@ public class FluidOutputProcessPartCommonSystem extends BaseComponentSystem {
         for (Map.Entry<String, Float> fluidAmount : fluidOutputComponent.fluidVolumes.entrySet()) {
             String fluidName = fluidAmount.getKey();
             FluidRenderer fluidRenderer = fluidRegistry.getFluidRenderer(fluidAmount.getKey());
-            if (fluidRenderer == null) {
+            if (fluidRenderer != null) {
                 fluidName = fluidRenderer.getFluidName();
             }
             event.addOutputDescription(new ProcessPartDescription(new ResourceUrn(fluidAmount.getKey()), fluidAmount.getValue() + "mL " + fluidName));
