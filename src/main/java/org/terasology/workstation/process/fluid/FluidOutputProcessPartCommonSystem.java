@@ -23,7 +23,6 @@ import org.terasology.entitySystem.systems.BaseComponentSystem;
 import org.terasology.entitySystem.systems.RegisterSystem;
 import org.terasology.fluid.system.FluidManager;
 import org.terasology.fluid.system.FluidRegistry;
-import org.terasology.fluid.system.FluidRenderer;
 import org.terasology.fluid.system.FluidUtils;
 import org.terasology.registry.In;
 import org.terasology.workstation.process.ProcessPartDescription;
@@ -57,8 +56,8 @@ public class FluidOutputProcessPartCommonSystem extends BaseComponentSystem {
 
             for (Map.Entry<String, Float> fluidAmount : fluidOutputComponent.fluidVolumes.entrySet()) {
                 ResourceUrn resourceUrn = new ResourceUrn(fluidAmount.getKey());
-                FluidRenderer fluidRenderer = fluidRegistry.getFluidRenderer(resourceUrn.toString());
-                if (fluidRenderer == null) {
+                String fluidName = fluidRegistry.getDisplayName(resourceUrn.toString());
+                if (fluidName == null) {
                     event.addError(fluidAmount.getKey() + " is an invalid fluid in " + this.getClass().getSimpleName());
                 }
             }
@@ -127,11 +126,7 @@ public class FluidOutputProcessPartCommonSystem extends BaseComponentSystem {
     public void getOutputDescriptions(ProcessEntityGetOutputDescriptionEvent event, EntityRef processEntity,
                                       FluidOutputComponent fluidOutputComponent) {
         for (Map.Entry<String, Float> fluidAmount : fluidOutputComponent.fluidVolumes.entrySet()) {
-            String fluidName = fluidAmount.getKey();
-            FluidRenderer fluidRenderer = fluidRegistry.getFluidRenderer(fluidAmount.getKey());
-            if (fluidRenderer != null) {
-                fluidName = fluidRenderer.getFluidName();
-            }
+            String fluidName = fluidRegistry.getDisplayName(fluidAmount.getKey());
             event.addOutputDescription(new ProcessPartDescription(new ResourceUrn(fluidAmount.getKey()), fluidAmount.getValue() + "mL " + fluidName));
         }
     }
