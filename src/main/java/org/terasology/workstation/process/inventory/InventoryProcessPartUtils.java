@@ -17,10 +17,10 @@ package org.terasology.workstation.process.inventory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
-import org.terasology.assets.ResourceUrn;
 import org.terasology.entitySystem.entity.EntityBuilder;
 import org.terasology.entitySystem.entity.EntityManager;
 import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.logic.common.DisplayNameComponent;
 import org.terasology.logic.inventory.InventoryUtils;
 import org.terasology.logic.inventory.ItemComponent;
