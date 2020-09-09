@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.ui;
 
-import org.terasology.entitySystem.entity.EntityRef;
 import org.joml.Vector2i;
-import org.terasology.registry.CoreRegistry;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.CoreWidget;
 import org.terasology.nui.layouts.ColumnLayout;
@@ -41,7 +41,8 @@ public class ProcessListWidget extends CoreWidget implements WorkstationUI {
         WorkstationComponent workstationComponent = workstation.getComponent(WorkstationComponent.class);
 
         columnLayout = new ColumnLayout();
-        for (WorkstationProcess process : workstationRegistry.getWorkstationProcesses(workstationComponent.supportedProcessTypes.keySet())) {
+        for (WorkstationProcess process :
+                workstationRegistry.getWorkstationProcesses(workstationComponent.supportedProcessTypes.keySet())) {
             // add a description of each process to the layout
             columnLayout.addWidget(new ProcessSummaryWidget(process));
         }

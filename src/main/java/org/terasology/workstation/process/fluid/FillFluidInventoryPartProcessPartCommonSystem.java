@@ -1,35 +1,22 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.process.fluid;
 
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.registry.In;
 import org.terasology.fluid.component.FluidComponent;
 import org.terasology.fluid.component.FluidContainerItemComponent;
 import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.fluid.event.BeforeFluidPutInInventory;
 import org.terasology.fluid.system.FluidManager;
 import org.terasology.fluid.system.FluidUtils;
-import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.inventory.InventoryUtils;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.registry.In;
+import org.terasology.inventory.logic.InventoryManager;
+import org.terasology.inventory.logic.InventoryUtils;
 import org.terasology.workstation.component.SpecificInputSlotComponent;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.processPart.ProcessEntityIsInvalidToStartEvent;
@@ -38,29 +25,29 @@ import org.terasology.workstation.processPart.inventory.ProcessEntityIsInvalidFo
 
 @RegisterSystem
 public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponentSystem {
+    public static final float DELTA = 0.001f;
     @In
     EntityManager entityManager;
     @In
     FluidManager fluidManager;
-
-    public static final float DELTA = 0.001f;
 
     ///// Processing
 
     /**
      * Validate the process to ensure that it's correct and ready for execution.
      *
-     * @param event                     The event which has a reference to the workstation and instigator.
-     * @param processEntity             The reference to the process that's being verified.
-     * @param fillFluidInventoryPart    A component included for filtering out non-matching events. Here, we only want
-     *                                  processes related to filling an inventory slot with fluid.
+     * @param event The event which has a reference to the workstation and instigator.
+     * @param processEntity The reference to the process that's being verified.
+     * @param fillFluidInventoryPart A component included for filtering out non-matching events. Here, we only
+     *         want processes related to filling an inventory slot with fluid.
      */
     @ReceiveEvent
     public void validateToStartExecution(ProcessEntityIsInvalidToStartEvent event, EntityRef processEntity,
                                          FillFluidInventoryPart fillFluidInventoryPart) {
         FluidInventoryComponent fluidInventory = event.getWorkstation().getComponent(FluidInventoryComponent.class);
 
-        for (int containerInputSlot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_CONTAINER_INPUT")) {
+        for (int containerInputSlot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), 
+                "FLUID_CONTAINER_INPUT")) {
             EntityRef containerItem = InventoryUtils.getItemAt(event.getWorkstation(), containerInputSlot);
             if (canEmptyContainerItem(event.getWorkstation(), fluidInventory, containerItem)) {
                 processEntity.addComponent(new SpecificInputSlotComponent(containerInputSlot));
@@ -74,10 +61,10 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Start execution of the fluid inventory slot filling process.
      *
-     * @param event                     The event which has a reference to the workstation and instigator.
-     * @param processEntity             The reference to the process being executed.
-     * @param fillFluidInventoryPart    A component included for filtering out non-matching events. Here, we only want
-     *                                  processes related to filling inventory slots with fluid.
+     * @param event The event which has a reference to the workstation and instigator.
+     * @param processEntity The reference to the process being executed.
+     * @param fillFluidInventoryPart A component included for filtering out non-matching events. Here, we only
+     *         want processes related to filling inventory slots with fluid.
      */
     @ReceiveEvent
     public void startExecution(ProcessEntityStartExecutionEvent event, EntityRef processEntity,
@@ -86,16 +73,19 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
 
         EntityRef containerItem = InventoryUtils.getItemAt(event.getWorkstation(), inputSlot.slot);
         FluidContainerItemComponent fluidContainer = containerItem.getComponent(FluidContainerItemComponent.class);
-        boolean transferredFromHolder = false; // Indicate whether addFluidFromHolder (true) or addFluid (false) was used.
+        boolean transferredFromHolder = false; // Indicate whether addFluidFromHolder (true) or addFluid (false) was 
+        // used.
 
         for (int fluidSlot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_INPUT")) {
-            if (fluidManager.addFluidFromHolder(event.getInstigator(), event.getWorkstation(), containerItem, fluidSlot, fluidContainer.fluidType, fluidContainer.volume)) {
+            if (fluidManager.addFluidFromHolder(event.getInstigator(), event.getWorkstation(), containerItem,
+                    fluidSlot, fluidContainer.fluidType, fluidContainer.volume)) {
                 transferredFromHolder = true;
                 break;
             }
         }
 
-        final EntityRef removedItem = CoreRegistry.get(InventoryManager.class).removeItem(event.getWorkstation(), event.getInstigator(), containerItem, false, 1);
+        final EntityRef removedItem = CoreRegistry.get(InventoryManager.class).removeItem(event.getWorkstation(),
+                event.getInstigator(), containerItem, false, 1);
         if (removedItem != null) {
             // Don't set the fluid to null unless it's empty or it has not been transferred.
             if (!transferredFromHolder || fluidContainer.volume <= DELTA) {
@@ -103,7 +93,8 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
             }
 
             // Transfer the used fluid container to the workstation's FLUID_CONTAINER_OUTPUT slot.
-            if (CoreRegistry.get(InventoryManager.class).giveItem(event.getWorkstation(), event.getInstigator(), removedItem,
+            if (CoreRegistry.get(InventoryManager.class).giveItem(event.getWorkstation(), event.getInstigator(),
+                    removedItem,
                     WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_CONTAINER_OUTPUT"))) {
                 return;
             }
@@ -117,19 +108,21 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Verify if the provided fluid container(s) and fluid inventory are valid for this process.
      *
-     * @param event                     The event which has a reference to the workstation, slot number, item, and instigator.
-     * @param processEntity             The reference to the process that's intending to use these items.
-     * @param fillFluidInventoryPart    A component included for filtering out non-matching events. Here, we only want
-     *                                  processes related to filling an inventory slot with fluid.
+     * @param event The event which has a reference to the workstation, slot number, item, and instigator.
+     * @param processEntity The reference to the process that's intending to use these items.
+     * @param fillFluidInventoryPart A component included for filtering out non-matching events. Here, we only
+     *         want processes related to filling an inventory slot with fluid.
      */
     @ReceiveEvent
     public void isValidInventoryItem(ProcessEntityIsInvalidForInventoryItemEvent event, EntityRef processEntity,
                                      FillFluidInventoryPart fillFluidInventoryPart) {
         if (WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_CONTAINER_INPUT").contains(event.getSlotNo())
                 || WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_CONTAINER_OUTPUT").contains(event.getSlotNo())) {
-            for (int slot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_CONTAINER_INPUT")) {
+            for (int slot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_CONTAINER_INPUT"
+            )) {
                 if (slot == event.getSlotNo()) {
-                    FluidContainerItemComponent fluidContainer = event.getItem().getComponent(FluidContainerItemComponent.class);
+                    FluidContainerItemComponent fluidContainer =
+                            event.getItem().getComponent(FluidContainerItemComponent.class);
                     if (fluidContainer == null) {
                         event.consume();
                         return;
@@ -139,14 +132,18 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
                         return;
                     }
 
-                    FluidInventoryComponent fluidInventory = event.getWorkstation().getComponent(FluidInventoryComponent.class);
+                    FluidInventoryComponent fluidInventory =
+                            event.getWorkstation().getComponent(FluidInventoryComponent.class);
                     if (fluidInventory == null) {
                         event.consume();
                         return;
                     }
 
-                    for (int fluidSlot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_INPUT")) {
-                        BeforeFluidPutInInventory beforeFluidAdded = new BeforeFluidPutInInventory(event.getInstigator(), fluidContainer.fluidType, fluidContainer.volume, fluidSlot);
+                    for (int fluidSlot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), 
+                            "FLUID_INPUT")) {
+                        BeforeFluidPutInInventory beforeFluidAdded =
+                                new BeforeFluidPutInInventory(event.getInstigator(), fluidContainer.fluidType,
+                                        fluidContainer.volume, fluidSlot);
                         event.getWorkstation().send(beforeFluidAdded);
                         if (!beforeFluidAdded.isConsumed()) {
                             return;
@@ -155,7 +152,8 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
                 }
             }
 
-            for (int slot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), "FLUID_CONTAINER_OUTPUT")) {
+            for (int slot : WorkstationInventoryUtils.getAssignedSlots(event.getWorkstation(), 
+                    "FLUID_CONTAINER_OUTPUT")) {
                 if (slot == event.getSlotNo()) {
                     if (event.getWorkstation() != event.getInstigator()) {
                         event.consume();
@@ -171,11 +169,12 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Check to see if we can use the fluid container item.
      *
-     * @param workstation       The workstation which interacts with and houses the fluid inventory.
-     * @param fluidInventory    The component which stores the inventory of fluids.
-     * @param containerItem     An entity that is a fluid container.
+     * @param workstation The workstation which interacts with and houses the fluid inventory.
+     * @param fluidInventory The component which stores the inventory of fluids.
+     * @param containerItem An entity that is a fluid container.
      */
-    private boolean canEmptyContainerItem(EntityRef workstation, FluidInventoryComponent fluidInventory, EntityRef containerItem) {
+    private boolean canEmptyContainerItem(EntityRef workstation, FluidInventoryComponent fluidInventory,
+                                          EntityRef containerItem) {
         FluidContainerItemComponent fluidContainer = containerItem.getComponent(FluidContainerItemComponent.class);
         if (fluidContainer != null && fluidContainer.fluidType != null) {
             for (int fluidSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_INPUT")) {
@@ -186,9 +185,11 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
                 if (canStoreContentsOfContainerInFluidSlot(fluidContainer, fluid, maximumVolume)) {
                     EntityRef tempEntity = containerItem.copy();
                     try {
-                        FluidContainerItemComponent fluidContainerCopy = tempEntity.getComponent(FluidContainerItemComponent.class);
+                        FluidContainerItemComponent fluidContainerCopy =
+                                tempEntity.getComponent(FluidContainerItemComponent.class);
                         fluidContainerCopy.fluidType = null;
-                        for (int containerOutputSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_OUTPUT")) {
+                        for (int containerOutputSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, 
+                                "FLUID_CONTAINER_OUTPUT")) {
                             EntityRef outputItem = InventoryUtils.getItemAt(workstation, containerOutputSlot);
                             if (InventoryUtils.canStackInto(tempEntity, outputItem)) {
                                 return true;
@@ -202,14 +203,17 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
                 else if (canPartiallyStoreContentsOfContainerInFluidSlot(fluidContainer, fluid, maximumVolume)) {
                     EntityRef tempEntity = containerItem.copy();
                     try {
-                        FluidContainerItemComponent fluidContainerCopy = tempEntity.getComponent(FluidContainerItemComponent.class);
-                        fluidContainerCopy.volume = Math.max(0f, fluidContainerCopy.volume - (maximumVolume - fluid.volume));
+                        FluidContainerItemComponent fluidContainerCopy =
+                                tempEntity.getComponent(FluidContainerItemComponent.class);
+                        fluidContainerCopy.volume = Math.max(0f,
+                                fluidContainerCopy.volume - (maximumVolume - fluid.volume));
 
                         if (fluidContainerCopy.volume <= DELTA) {
                             fluidContainerCopy.fluidType = null;
                         }
 
-                        for (int containerOutputSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, "FLUID_CONTAINER_OUTPUT")) {
+                        for (int containerOutputSlot : WorkstationInventoryUtils.getAssignedSlots(workstation, 
+                                "FLUID_CONTAINER_OUTPUT")) {
                             EntityRef outputItem = InventoryUtils.getItemAt(workstation, containerOutputSlot);
                             if (InventoryUtils.canStackInto(tempEntity, outputItem)) {
                                 return true;
@@ -225,13 +229,15 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     }
 
     /**
-     * Check to see if we can store the entire volume of the fluid container plus pre-existing fluid in this fluid slot.
+     * Check to see if we can store the entire volume of the fluid container plus pre-existing fluid in this fluid
+     * slot.
      *
-     * @param fluidContainer    The fluid container item component that houses the fluid.
-     * @param fluid             The fluid component that contains that current level of fluid in whatever.
-     * @param maximumVolume     The maximum volume of fluid that can be stored.
+     * @param fluidContainer The fluid container item component that houses the fluid.
+     * @param fluid The fluid component that contains that current level of fluid in whatever.
+     * @param maximumVolume The maximum volume of fluid that can be stored.
      */
-    private boolean canStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer, FluidComponent fluid, float maximumVolume) {
+    private boolean canStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer,
+                                                           FluidComponent fluid, float maximumVolume) {
         return (fluid == null && fluidContainer.volume <= maximumVolume)
                 || (fluid != null && fluid.fluidType.equals(fluidContainer.fluidType) && fluidContainer.volume + fluid.volume <= maximumVolume);
     }
@@ -239,11 +245,12 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Check to see if we can partially store the some of the volume of the fluid container in this fluid slot.
      *
-     * @param fluidContainer    The fluid container item component that houses the fluid.
-     * @param fluid             The fluid component that contains that current level of fluid in whatever.
-     * @param maximumVolume     The maximum volume of fluid that can be stored.
+     * @param fluidContainer The fluid container item component that houses the fluid.
+     * @param fluid The fluid component that contains that current level of fluid in whatever.
+     * @param maximumVolume The maximum volume of fluid that can be stored.
      */
-    private boolean canPartiallyStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer, FluidComponent fluid, float maximumVolume) {
+    private boolean canPartiallyStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer,
+                                                                    FluidComponent fluid, float maximumVolume) {
         return (fluid == null && fluidContainer.volume <= maximumVolume)
                 || (fluid != null && fluid.fluidType.equals(fluidContainer.fluidType) && fluidContainer.volume > 0 && fluid.volume < maximumVolume);
     }

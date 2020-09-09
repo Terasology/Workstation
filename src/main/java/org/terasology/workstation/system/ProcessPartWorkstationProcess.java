@@ -1,25 +1,12 @@
-/*
- * Copyright 2014 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.system;
 
 import com.google.common.collect.Lists;
-import org.terasology.entitySystem.entity.EntityBuilder;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.entity.EntityBuilder;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.DescribeProcess;
@@ -42,17 +29,16 @@ import org.terasology.workstation.processPart.metadata.ProcessEntityGetOutputDes
 import java.util.Collection;
 
 /**
- * Order of events for the most simple processing path:
- * - ProcessEntityIsInvalidEvent (this happens once when loaded)
- * -
+ * Order of events for the most simple processing path: - ProcessEntityIsInvalidEvent (this happens once when loaded) -
  */
-public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
-    private String id;
-    private ProcessDefinitionComponent processDefinitionComponent;
-    private String processTypeName;
-    private Prefab prefab;
+public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem,
+        ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
+    private final String id;
+    private final ProcessDefinitionComponent processDefinitionComponent;
+    private final String processTypeName;
+    private final Prefab prefab;
 
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     ProcessPartWorkstationProcess(Prefab prefab, EntityManager entityManager) throws InvalidProcessPartException {
         this.entityManager = entityManager;
@@ -67,7 +53,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         tempProcessEntity.destroy();
 
         if (processEntityIsInvalidEvent.hasErrors()) {
-            throw new InvalidProcessPartException(String.join(System.lineSeparator(), processEntityIsInvalidEvent.getErrors()));
+            throw new InvalidProcessPartException(String.join(System.lineSeparator(),
+                    processEntityIsInvalidEvent.getErrors()));
         }
     }
 
@@ -84,7 +71,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public boolean isValid(EntityRef workstation, int slotNo, EntityRef instigator, EntityRef item) {
-        ProcessEntityIsInvalidForInventoryItemEvent event = new ProcessEntityIsInvalidForInventoryItemEvent(workstation, slotNo, instigator, item);
+        ProcessEntityIsInvalidForInventoryItemEvent event =
+                new ProcessEntityIsInvalidForInventoryItemEvent(workstation, slotNo, instigator, item);
         EntityRef tempProcessEntity = createProcessEntity(false);
         tempProcessEntity.send(event);
         tempProcessEntity.destroy();
@@ -102,7 +90,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public boolean isValidFluid(EntityRef workstation, int slotNo, EntityRef instigator, String fluidType) {
-        ProcessEntityIsInvalidForFluidEvent event = new ProcessEntityIsInvalidForFluidEvent(workstation, slotNo, instigator, fluidType);
+        ProcessEntityIsInvalidForFluidEvent event = new ProcessEntityIsInvalidForFluidEvent(workstation, slotNo,
+                instigator, fluidType);
         EntityRef tempProcessEntity = createProcessEntity(false);
         tempProcessEntity.send(event);
         tempProcessEntity.destroy();
@@ -145,7 +134,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         }
 
         // Execute the process!
-        ProcessEntityStartExecutionEvent processEntityStartExecutionEvent = new ProcessEntityStartExecutionEvent(instigator, workstation);
+        ProcessEntityStartExecutionEvent processEntityStartExecutionEvent =
+                new ProcessEntityStartExecutionEvent(instigator, workstation);
         processEntity.send(processEntityStartExecutionEvent);
 
         // How long does this process take before calling finish?
@@ -158,7 +148,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     @Override
     public void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         // Finish processing, hopefully generating the desired results
-        ProcessEntityFinishExecutionEvent processEntityFinishExecutionEvent = new ProcessEntityFinishExecutionEvent(instigator, workstation);
+        ProcessEntityFinishExecutionEvent processEntityFinishExecutionEvent =
+                new ProcessEntityFinishExecutionEvent(instigator, workstation);
         processEntity.send(processEntityFinishExecutionEvent);
     }
 

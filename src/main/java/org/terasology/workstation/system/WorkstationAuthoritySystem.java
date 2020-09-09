@@ -1,41 +1,28 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2020 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.system;
 
-import org.terasology.engine.Time;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
-import org.terasology.logic.delay.DelayManager;
-import org.terasology.logic.delay.DelayedActionTriggeredEvent;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.registry.In;
+import org.terasology.engine.core.Time;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnAddedComponent;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.engine.logic.delay.DelayManager;
+import org.terasology.engine.logic.delay.DelayedActionTriggeredEvent;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.event.WorkstationStateChanged;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.WorkstationProcess;
-import org.terasology.world.block.BlockComponent;
 
 import java.util.Deque;
 import java.util.HashMap;
@@ -48,52 +35,70 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
     public static final String WORKSTATION_PROCESSING = "Workstation:Processing";
 
     private static final int AUTOMATIC_PROCESSING_REVIVAL_INTERVAL = 10000;
-
+    // I would rather use LinkedHashSet, however cannot due to PojoEntityRef's hashcode changing when it is being
+    // destroyed.
+    private final Deque<EntityRef> pendingWorkstationChecks = new LinkedList<>();
     @In
     private WorkstationRegistry workstationRegistry;
     @In
     private Time time;
     @In
     private EntityManager entityManager;
-
     private boolean executingProcess;
     private long nextAutomaticProcessingRevivalTime;
 
-    // I would rather use LinkedHashSet, however cannot due to PojoEntityRef's hashcode changing when it is being destroyed.
-    private Deque<EntityRef> pendingWorkstationChecks = new LinkedList<>();
+    private static void finishProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process,
+                                         WorkstationProcessingComponent workstationProcessing) {
+        final WorkstationProcessingComponent.ProcessDef processDef =
+                workstationProcessing.processes.remove(process.getProcessType());
+
+        if (workstationProcessing.processes.size() > 0) {
+            workstation.saveComponent(workstationProcessing);
+        } else {
+            workstation.removeComponent(WorkstationProcessingComponent.class);
+        }
+
+        process.finishProcessing(instigator, workstation, processDef.processEntity);
+
+        processDef.processEntity.destroy();
+    }
 
     @ReceiveEvent
-    public void machineAdded(OnAddedComponent event, EntityRef workstation, WorkstationComponent workstationComponent, BlockComponent block) {
+    public void machineAdded(OnAddedComponent event, EntityRef workstation, WorkstationComponent workstationComponent
+            , BlockComponent block) {
         pendingWorkstationChecks.add(workstation);
         startProcessingIfNotExecuting();
     }
 
     @ReceiveEvent
-    public void automaticProcessingStateChanged(WorkstationStateChanged event, EntityRef workstation, WorkstationComponent workstationComponent) {
+    public void automaticProcessingStateChanged(WorkstationStateChanged event, EntityRef workstation,
+                                                WorkstationComponent workstationComponent) {
         pendingWorkstationChecks.add(workstation);
         startProcessingIfNotExecuting();
     }
 
     @ReceiveEvent
-    public void finishProcessing(DelayedActionTriggeredEvent event, EntityRef workstation, WorkstationComponent workstationComp,
+    public void finishProcessing(DelayedActionTriggeredEvent event, EntityRef workstation,
+                                 WorkstationComponent workstationComp,
                                  WorkstationProcessingComponent workstationProcessing) {
         PerformanceMonitor.startActivity("Workstation - finishing process");
         executingProcess = true;
         try {
             String actionId = event.getActionId();
-                long gameTime = time.getGameTimeInMs();
-                Map<String, WorkstationProcessingComponent.ProcessDef> processesCopy = new HashMap<>(workstationProcessing.processes);
-                for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
-                    WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
-                    if (processDef.processingFinishTime <= gameTime) {
-                        final WorkstationProcess workstationProcess = workstationRegistry.getWorkstationProcessById(
-                                workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
-                        finishProcessing(workstation, workstation, workstationProcess);
-                    }
+            long gameTime = time.getGameTimeInMs();
+            Map<String, WorkstationProcessingComponent.ProcessDef> processesCopy =
+                    new HashMap<>(workstationProcessing.processes);
+            for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
+                WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
+                if (processDef.processingFinishTime <= gameTime) {
+                    final WorkstationProcess workstationProcess = workstationRegistry.getWorkstationProcessById(
+                            workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
+                    finishProcessing(workstation, workstation, workstationProcess);
                 }
+            }
 
-                pendingWorkstationChecks.add(workstation);
-                processPendingChecks();
+            pendingWorkstationChecks.add(workstation);
+            processPendingChecks();
         } finally {
             executingProcess = false;
             PerformanceMonitor.endActivity();
@@ -107,11 +112,14 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
         WorkstationComponent workstationComp = workstation.getComponent(WorkstationComponent.class);
 
         if (workstationComp != null) {
-            WorkstationProcess process = workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(), processId);
+            WorkstationProcess process =
+                    workstationRegistry.getWorkstationProcessById(workstationComp.supportedProcessTypes.keySet(),
+                            processId);
             if (process != null) {
                 String processType = process.getProcessType();
 
-                WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+                WorkstationProcessingComponent workstationProcessing =
+                        workstation.getComponent(WorkstationProcessingComponent.class);
                 // It's not processing anything, or not processing this type of process
                 if (workstationProcessing == null || !workstationProcessing.processes.containsKey(processType)) {
                     executingProcess = true;
@@ -176,7 +184,8 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
             }
         }
 
-        for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(possibleProcesses.keySet())) {
+        for (WorkstationProcess workstationProcess :
+                workstationRegistry.getWorkstationProcesses(possibleProcesses.keySet())) {
             if (possibleProcesses.get(workstationProcess.getProcessType())) {
                 startProcessingAutomatic(entity, workstationProcess, time.getGameTimeInMs());
             }
@@ -188,12 +197,15 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
         long currentTime = time.getGameTimeInMs();
         if (currentTime > nextAutomaticProcessingRevivalTime) {
             nextAutomaticProcessingRevivalTime = currentTime + AUTOMATIC_PROCESSING_REVIVAL_INTERVAL;
-            for (EntityRef entityRef : entityManager.getEntitiesWith(WorkstationComponent.class, BlockComponent.class)) {
+            for (EntityRef entityRef : entityManager.getEntitiesWith(WorkstationComponent.class,
+                    BlockComponent.class)) {
                 WorkstationComponent workstationComponent = entityRef.getComponent(WorkstationComponent.class);
                 if (workstationComponent.supportedProcessTypes.containsValue(true)
                         && !entityRef.hasComponent(WorkstationProcessingComponent.class)) {
-                    // there are automatic processes and there is no process currently running, trigger a state change event
-                    // sometimes automatic workstations need to be jump started after world load or if there are not sufficient state changed events
+                    // there are automatic processes and there is no process currently running, trigger a state 
+                    // change event
+                    // sometimes automatic workstations need to be jump started after world load or if there are not 
+                    // sufficient state changed events
                     entityRef.send(new WorkstationStateChanged());
                 }
             }
@@ -201,7 +213,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
     }
 
     private void startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcess process,
-                                             WorkstationProcessRequest request, long gameTime) {
+                                       WorkstationProcessRequest request, long gameTime) {
         EntityRef processEntity = process.createProcessEntity();
         if (processEntity == null || processEntity == EntityRef.NULL) {
             // create a blank process entity;
@@ -217,7 +229,8 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
             processDef.processingProcessId = process.getId();
             processDef.processEntity = processEntity;
 
-            WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+            WorkstationProcessingComponent workstationProcessing =
+                    workstation.getComponent(WorkstationProcessingComponent.class);
             if (workstationProcessing == null) {
                 workstationProcessing = new WorkstationProcessingComponent();
                 workstationProcessing.processes.put(process.getProcessType(), processDef);
@@ -253,7 +266,8 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
             processDef.processingProcessId = process.getId();
             processDef.processEntity = processEntity;
 
-            WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+            WorkstationProcessingComponent workstationProcessing =
+                    workstation.getComponent(WorkstationProcessingComponent.class);
             if (workstationProcessing == null) {
                 workstationProcessing = new WorkstationProcessingComponent();
                 workstationProcessing.processes.put(process.getProcessType(), processDef);
@@ -273,27 +287,15 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
         }
     }
 
-    private static void finishProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process, WorkstationProcessingComponent workstationProcessing) {
-        final WorkstationProcessingComponent.ProcessDef processDef = workstationProcessing.processes.remove(process.getProcessType());
-
-        if (workstationProcessing.processes.size() > 0) {
-            workstation.saveComponent(workstationProcessing);
-        } else {
-            workstation.removeComponent(WorkstationProcessingComponent.class);
-        }
-
-        process.finishProcessing(instigator, workstation, processDef.processEntity);
-
-        processDef.processEntity.destroy();
-    }
-
     private void finishProcessing(EntityRef instigator, EntityRef workstation, WorkstationProcess process) {
-        finishProcessing(instigator, workstation, process, workstation.getComponent(WorkstationProcessingComponent.class));
+        finishProcessing(instigator, workstation, process,
+                workstation.getComponent(WorkstationProcessingComponent.class));
     }
 
     // If necessary, schedule wake-ups (i.e. DelayActions) for the processes in this workstation.
     private void scheduleWorkstationWakeUpIfNecessary(EntityRef workstation, long currentTime) {
-        WorkstationProcessingComponent workstationProcessing = workstation.getComponent(WorkstationProcessingComponent.class);
+        WorkstationProcessingComponent workstationProcessing =
+                workstation.getComponent(WorkstationProcessingComponent.class);
         if (workstationProcessing != null) {
             long endTime = Long.MAX_VALUE;
 

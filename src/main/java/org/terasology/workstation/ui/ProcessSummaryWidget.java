@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.ui;
 
-import org.terasology.utilities.Assets;
 import org.joml.Vector2i;
+import org.terasology.engine.utilities.Assets;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.CoreWidget;
 import org.terasology.nui.UIWidget;
