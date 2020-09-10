@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import org.terasology.engine.entitySystem.Component;
 import org.terasology.engine.network.Replicate;
 import org.terasology.engine.world.block.ForceBlockActive;
-import org.terasology.reflection.MappedContainer;
+import org.terasology.nui.reflection.MappedContainer;
 
 import java.util.Map;
 
