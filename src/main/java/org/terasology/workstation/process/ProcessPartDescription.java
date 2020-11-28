@@ -8,28 +8,33 @@ import org.terasology.nui.widgets.UILabel;
 
 public class ProcessPartDescription {
     UIWidget widget;
-    String description;
+
+    String displayName;
     ResourceUrn resourceUrn;
 
-    public ProcessPartDescription(ResourceUrn resourceUrn, String description) {
-        this(resourceUrn, description, new UILabel(description));
+    public ProcessPartDescription(ResourceUrn resourceUrn, String displayName) {
+        this(resourceUrn, displayName, new UILabel(displayName));
     }
 
-    public ProcessPartDescription(ResourceUrn resourceUrn, String description, UIWidget widget) {
+    public ProcessPartDescription(ResourceUrn resourceUrn, String displayName, UIWidget widget) {
         this.resourceUrn = resourceUrn;
-        this.description = description;
+        this.displayName = displayName;
         this.widget = widget;
     }
 
     @Override
     public String toString() {
-        return description;
+        return displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public UIWidget getWidget() {
         if (widget == null) {
             UILabel textDesc = new UILabel();
-            textDesc.setText(description);
+            textDesc.setText(displayName);
             return textDesc;
         } else {
             return widget;
