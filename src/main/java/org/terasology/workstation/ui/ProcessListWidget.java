@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.ui;
 
+import com.google.common.base.Preconditions;
 import org.terasology.entitySystem.entity.EntityRef;
 import org.joml.Vector2i;
 import org.terasology.registry.CoreRegistry;
@@ -11,6 +12,9 @@ import org.terasology.nui.layouts.ColumnLayout;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.system.WorkstationRegistry;
+
+import java.util.Collection;
+import java.util.Comparator;
 
 /**
  * Lists processes related to the passed in workstation
@@ -34,6 +38,8 @@ public class ProcessListWidget extends CoreWidget implements WorkstationUI {
 
     @Override
     public void initializeWorkstation(EntityRef workstationEntity) {
+        Preconditions.checkArgument(workstation.hasComponent(WorkstationComponent.class));
+
         this.workstation = workstationEntity;
 
         // loop through all relevant processes and add a representation to the screen
@@ -41,9 +47,12 @@ public class ProcessListWidget extends CoreWidget implements WorkstationUI {
         WorkstationComponent workstationComponent = workstation.getComponent(WorkstationComponent.class);
 
         columnLayout = new ColumnLayout();
-        for (WorkstationProcess process : workstationRegistry.getWorkstationProcesses(workstationComponent.supportedProcessTypes.keySet())) {
-            // add a description of each process to the layout
-            columnLayout.addWidget(new ProcessSummaryWidget(process));
-        }
+
+        Collection<WorkstationProcess> processes =
+                workstationRegistry.getWorkstationProcesses(workstationComponent.supportedProcessTypes.keySet());
+
+        processes.stream()
+                .sorted(Comparator.comparing(WorkstationProcess::getProcessTypeName))
+                .forEach(process -> columnLayout.addWidget(new ProcessSummaryWidget(process)));
     }
 }
