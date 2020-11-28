@@ -35,6 +35,7 @@ import org.terasology.world.block.items.BlockItemFactory;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class InventoryProcessPartUtils {
@@ -153,12 +154,8 @@ public abstract class InventoryProcessPartUtils {
             resourceUrn = blockItemComponent.blockFamily.getURI().getBlockFamilyDefinitionUrn();
         }
 
-        int stackCount = InventoryUtils.getStackCount(item);
-        String displayName = "";
-        DisplayNameComponent displayNameComponent = item.getComponent(DisplayNameComponent.class);
-        if (displayNameComponent != null) {
-            displayName = displayNameComponent.name;
-        }
-        return new ProcessPartDescription(resourceUrn, stackCount + " " + displayName, new InventoryItem(item));
+        String displayName =
+                Optional.ofNullable(item.getComponent(DisplayNameComponent.class)).map(c -> c.name).orElse("");
+        return new ProcessPartDescription(resourceUrn, displayName, new InventoryItem(item));
     }
 }
