@@ -40,13 +40,14 @@ import org.terasology.workstation.processPart.metadata.ProcessEntityGetInputDesc
 import org.terasology.workstation.processPart.metadata.ProcessEntityGetOutputDescriptionEvent;
 
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 
 /**
- * Order of events for the most simple processing path:
- * - ProcessEntityIsInvalidEvent (this happens once when loaded)
- * -
+ * Order of events for the most simple processing path: - ProcessEntityIsInvalidEvent (this happens once when loaded) -
  */
-public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem, ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
+public class ProcessPartWorkstationProcess implements WorkstationProcess, ValidateInventoryItem,
+        ValidateFluidInventoryItem, DescribeProcess, ValidateProcess {
     private String id;
     private ProcessDefinitionComponent processDefinitionComponent;
     private String processTypeName;
@@ -67,7 +68,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         tempProcessEntity.destroy();
 
         if (processEntityIsInvalidEvent.hasErrors()) {
-            throw new InvalidProcessPartException(String.join(System.lineSeparator(), processEntityIsInvalidEvent.getErrors()));
+            throw new InvalidProcessPartException(String.join(System.lineSeparator(),
+                    processEntityIsInvalidEvent.getErrors()));
         }
     }
 
@@ -84,7 +86,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public boolean isValid(EntityRef workstation, int slotNo, EntityRef instigator, EntityRef item) {
-        ProcessEntityIsInvalidForInventoryItemEvent event = new ProcessEntityIsInvalidForInventoryItemEvent(workstation, slotNo, instigator, item);
+        ProcessEntityIsInvalidForInventoryItemEvent event =
+                new ProcessEntityIsInvalidForInventoryItemEvent(workstation, slotNo, instigator, item);
         EntityRef tempProcessEntity = createProcessEntity(false);
         tempProcessEntity.send(event);
         tempProcessEntity.destroy();
@@ -102,7 +105,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
 
     @Override
     public boolean isValidFluid(EntityRef workstation, int slotNo, EntityRef instigator, String fluidType) {
-        ProcessEntityIsInvalidForFluidEvent event = new ProcessEntityIsInvalidForFluidEvent(workstation, slotNo, instigator, fluidType);
+        ProcessEntityIsInvalidForFluidEvent event = new ProcessEntityIsInvalidForFluidEvent(workstation, slotNo,
+                instigator, fluidType);
         EntityRef tempProcessEntity = createProcessEntity(false);
         tempProcessEntity.send(event);
         tempProcessEntity.destroy();
@@ -145,7 +149,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         }
 
         // Execute the process!
-        ProcessEntityStartExecutionEvent processEntityStartExecutionEvent = new ProcessEntityStartExecutionEvent(instigator, workstation);
+        ProcessEntityStartExecutionEvent processEntityStartExecutionEvent =
+                new ProcessEntityStartExecutionEvent(instigator, workstation);
         processEntity.send(processEntityStartExecutionEvent);
 
         // How long does this process take before calling finish?
@@ -158,7 +163,8 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
     @Override
     public void finishProcessing(EntityRef instigator, EntityRef workstation, EntityRef processEntity) {
         // Finish processing, hopefully generating the desired results
-        ProcessEntityFinishExecutionEvent processEntityFinishExecutionEvent = new ProcessEntityFinishExecutionEvent(instigator, workstation);
+        ProcessEntityFinishExecutionEvent processEntityFinishExecutionEvent =
+                new ProcessEntityFinishExecutionEvent(instigator, workstation);
         processEntity.send(processEntityFinishExecutionEvent);
     }
 
@@ -168,7 +174,10 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         EntityRef tempProcessEntity = createProcessEntity(false);
         tempProcessEntity.send(event);
         tempProcessEntity.destroy();
-        return Lists.newLinkedList(event.getOutputDescriptions());
+
+        List<ProcessPartDescription> result = Lists.newLinkedList(event.getOutputDescriptions());
+        result.sort(Comparator.comparing(ProcessPartDescription::getDisplayName));
+        return result;
     }
 
     @Override
@@ -177,6 +186,9 @@ public class ProcessPartWorkstationProcess implements WorkstationProcess, Valida
         EntityRef tempProcessEntity = createProcessEntity(false);
         tempProcessEntity.send(event);
         tempProcessEntity.destroy();
-        return Lists.newLinkedList(event.getInputDescriptions());
+
+        List<ProcessPartDescription> result = Lists.newLinkedList(event.getInputDescriptions());
+        result.sort(Comparator.comparing(ProcessPartDescription::getDisplayName));
+        return result;
     }
 }
