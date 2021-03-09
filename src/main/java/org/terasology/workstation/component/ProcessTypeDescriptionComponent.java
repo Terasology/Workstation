@@ -15,7 +15,7 @@
  */
 package org.terasology.workstation.component;
 
-import org.terasology.entitySystem.Component;
+import org.terasology.engine.entitySystem.Component;
 
 public class ProcessTypeDescriptionComponent implements Component {
     public String name;

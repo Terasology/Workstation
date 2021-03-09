@@ -16,10 +16,10 @@
 package org.terasology.workstation.system;
 
 import com.google.common.collect.Lists;
-import org.terasology.entitySystem.entity.EntityBuilder;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.entity.EntityBuilder;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.process.DescribeProcess;

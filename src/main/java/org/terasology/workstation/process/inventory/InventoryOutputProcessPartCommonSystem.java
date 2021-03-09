@@ -17,14 +17,15 @@ package org.terasology.workstation.process.inventory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.EventPriority;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.registry.In;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.EventPriority;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.inventory.InventoryManager;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.block.BlockManager;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.processPart.ProcessEntityFinishExecutionEvent;
 import org.terasology.workstation.processPart.ProcessEntityIsInvalidEvent;
@@ -32,7 +33,6 @@ import org.terasology.workstation.processPart.ProcessEntityIsInvalidToStartEvent
 import org.terasology.workstation.processPart.inventory.ProcessEntityIsInvalidForInventoryItemEvent;
 import org.terasology.workstation.processPart.metadata.ProcessEntityGetOutputDescriptionEvent;
 import org.terasology.workstation.system.WorkstationRegistry;
-import org.terasology.world.block.BlockManager;
 
 import java.util.Set;
 

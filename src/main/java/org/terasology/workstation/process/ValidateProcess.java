@@ -15,7 +15,7 @@
  */
 package org.terasology.workstation.process;
 
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
 
 public interface ValidateProcess {
     boolean isValid(EntityRef instigator, EntityRef workstation);

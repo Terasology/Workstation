@@ -15,27 +15,27 @@
  */
 package org.terasology.workstation.system;
 
-import org.terasology.engine.Time;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.entity.lifecycleEvents.OnAddedComponent;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterMode;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.entitySystem.systems.UpdateSubscriberSystem;
-import org.terasology.logic.delay.DelayManager;
-import org.terasology.logic.delay.DelayedActionTriggeredEvent;
-import org.terasology.monitoring.PerformanceMonitor;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.registry.In;
+import org.terasology.engine.core.Time;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnAddedComponent;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterMode;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.systems.UpdateSubscriberSystem;
+import org.terasology.engine.logic.delay.DelayManager;
+import org.terasology.engine.logic.delay.DelayedActionTriggeredEvent;
+import org.terasology.engine.monitoring.PerformanceMonitor;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.world.block.BlockComponent;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
 import org.terasology.workstation.event.WorkstationStateChanged;
 import org.terasology.workstation.process.InvalidProcessException;
 import org.terasology.workstation.process.WorkstationProcess;
-import org.terasology.world.block.BlockComponent;
 
 import java.util.Deque;
 import java.util.HashMap;

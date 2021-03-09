@@ -15,8 +15,8 @@
  */
 package org.terasology.workstation.processPart;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.AbstractConsumableEvent;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.AbstractConsumableEvent;
 
 /**
  * Consuming this event signals that this process entity is invalid and prevents any further validation

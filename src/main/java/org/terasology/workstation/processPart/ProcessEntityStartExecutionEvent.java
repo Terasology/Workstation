@@ -15,8 +15,8 @@
  */
 package org.terasology.workstation.processPart;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.Event;
 
 /**
  * This event is fired on the process entity at the very start after validation.

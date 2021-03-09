@@ -15,8 +15,8 @@
  */
 package org.terasology.workstation.processPart.inventory;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.AbstractConsumableEvent;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.AbstractConsumableEvent;
 
 /**
  * Consume this event if the item suggested for the slot is not valid in this process.  This will allow slots on a workstation to only accept items that could be used in a process.

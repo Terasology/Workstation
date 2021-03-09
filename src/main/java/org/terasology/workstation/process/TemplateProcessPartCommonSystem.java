@@ -15,9 +15,9 @@
  */
 package org.terasology.workstation.process;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.workstation.process.inventory.InventoryInputComponent;
 import org.terasology.workstation.processPart.ProcessEntityFinishExecutionEvent;
 import org.terasology.workstation.processPart.ProcessEntityGetDurationEvent;

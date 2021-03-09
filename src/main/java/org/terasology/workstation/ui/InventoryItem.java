@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.ui;
 
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.rendering.nui.layers.ingame.inventory.ItemCell;
 import org.terasology.nui.databinding.DefaultBinding;
-import org.terasology.rendering.nui.layers.ingame.inventory.ItemCell;
 import org.terasology.nui.widgets.TooltipLine;
 import org.terasology.nui.widgets.UIList;
 

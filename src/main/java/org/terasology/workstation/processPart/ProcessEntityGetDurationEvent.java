@@ -15,8 +15,8 @@
  */
 package org.terasology.workstation.processPart;
 
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.AbstractValueModifiableEvent;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.AbstractValueModifiableEvent;
 
 /**
  * Handle this event to modify how long a process takes based on the components on the process entity.

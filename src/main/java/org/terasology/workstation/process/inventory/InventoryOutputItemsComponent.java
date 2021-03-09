@@ -16,8 +16,8 @@
 package org.terasology.workstation.process.inventory;
 
 import com.google.common.collect.Sets;
-import org.terasology.entitySystem.Component;
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.Component;
+import org.terasology.engine.entitySystem.entity.EntityRef;
 
 import java.util.Set;
 

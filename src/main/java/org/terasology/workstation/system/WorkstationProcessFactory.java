@@ -15,7 +15,7 @@
  */
 package org.terasology.workstation.system;
 
-import org.terasology.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.prefab.Prefab;
 import org.terasology.workstation.process.WorkstationProcess;
 
 /**

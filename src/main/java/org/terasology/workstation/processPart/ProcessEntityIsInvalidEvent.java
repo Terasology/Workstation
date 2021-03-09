@@ -16,7 +16,7 @@
 package org.terasology.workstation.processPart;
 
 import com.google.common.collect.Lists;
-import org.terasology.entitySystem.event.Event;
+import org.terasology.engine.entitySystem.event.Event;
 
 import java.util.List;
 

@@ -16,9 +16,9 @@
 package org.terasology.workstation.system;
 
 import org.slf4j.LoggerFactory;
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.registry.In;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.registry.In;
 import org.terasology.workstation.process.InvalidProcessPartException;
 import org.terasology.workstation.process.WorkstationProcess;
 

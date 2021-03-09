@@ -15,21 +15,21 @@
  */
 package org.terasology.workstation.process.fluid;
 
-import org.terasology.entitySystem.entity.EntityManager;
-import org.terasology.entitySystem.entity.EntityRef;
-import org.terasology.entitySystem.event.ReceiveEvent;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.entitySystem.entity.EntityManager;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.event.ReceiveEvent;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.inventory.InventoryManager;
+import org.terasology.engine.logic.inventory.InventoryUtils;
+import org.terasology.engine.registry.CoreRegistry;
+import org.terasology.engine.registry.In;
 import org.terasology.fluid.component.FluidComponent;
 import org.terasology.fluid.component.FluidContainerItemComponent;
 import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.fluid.event.BeforeFluidPutInInventory;
 import org.terasology.fluid.system.FluidManager;
 import org.terasology.fluid.system.FluidUtils;
-import org.terasology.logic.inventory.InventoryManager;
-import org.terasology.logic.inventory.InventoryUtils;
-import org.terasology.registry.CoreRegistry;
-import org.terasology.registry.In;
 import org.terasology.workstation.component.SpecificInputSlotComponent;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.processPart.ProcessEntityIsInvalidToStartEvent;

@@ -3,9 +3,9 @@
 package org.terasology.workstation.ui;
 
 import com.google.common.base.Preconditions;
-import org.terasology.entitySystem.entity.EntityRef;
 import org.joml.Vector2i;
-import org.terasology.registry.CoreRegistry;
+import org.terasology.engine.entitySystem.entity.EntityRef;
+import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.nui.Canvas;
 import org.terasology.nui.CoreWidget;
 import org.terasology.nui.layouts.ColumnLayout;

@@ -15,14 +15,14 @@
  */
 package org.terasology.workstation.system;
 
-import org.terasology.entitySystem.prefab.Prefab;
-import org.terasology.entitySystem.prefab.PrefabManager;
-import org.terasology.entitySystem.systems.BaseComponentSystem;
-import org.terasology.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.console.commandSystem.annotations.Command;
-import org.terasology.registry.In;
-import org.terasology.registry.InjectionHelper;
-import org.terasology.registry.Share;
+import org.terasology.engine.entitySystem.prefab.Prefab;
+import org.terasology.engine.entitySystem.prefab.PrefabManager;
+import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
+import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.engine.logic.console.commandSystem.annotations.Command;
+import org.terasology.engine.registry.In;
+import org.terasology.engine.registry.InjectionHelper;
+import org.terasology.engine.registry.Share;
 import org.terasology.workstation.component.ProcessDefinitionComponent;
 import org.terasology.workstation.process.WorkstationProcess;
 

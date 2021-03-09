@@ -15,7 +15,7 @@
  */
 package org.terasology.workstation.ui;
 
-import org.terasology.entitySystem.entity.EntityRef;
+import org.terasology.engine.entitySystem.entity.EntityRef;
 
 public interface WorkstationUI {
     void initializeWorkstation(EntityRef workstation);
