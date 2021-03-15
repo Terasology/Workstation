@@ -17,7 +17,7 @@ package org.terasology.workstation.process;
 
 import com.google.common.collect.Lists;
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.logic.inventory.InventoryAccessComponent;
+import org.terasology.logic.inventory.InventoryAccessComponent;
 import org.terasology.workstation.component.WorkstationInventoryComponent;
 
 import java.util.Collections;

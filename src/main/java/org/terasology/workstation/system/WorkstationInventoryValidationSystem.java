@@ -19,9 +19,9 @@ import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
-import org.terasology.engine.logic.inventory.InventoryComponent;
-import org.terasology.engine.logic.inventory.events.BeforeItemPutInInventory;
+import org.terasology.logic.inventory.InventoryComponent;
 import org.terasology.engine.registry.In;
+import org.terasology.logic.inventory.events.BeforeItemPutInInventory;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.process.WorkstationProcess;
 
