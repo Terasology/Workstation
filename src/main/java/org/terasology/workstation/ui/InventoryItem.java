@@ -3,7 +3,7 @@
 package org.terasology.workstation.ui;
 
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.rendering.nui.layers.ingame.inventory.ItemCell;
+import org.terasology.module.inventory.ui.ItemCell;
 import org.terasology.nui.databinding.DefaultBinding;
 import org.terasology.nui.widgets.TooltipLine;
 import org.terasology.nui.widgets.UIList;

@@ -23,7 +23,7 @@ import org.terasology.engine.entitySystem.event.EventPriority;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
-import org.terasology.logic.inventory.InventoryManager;
+import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.world.block.BlockManager;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
