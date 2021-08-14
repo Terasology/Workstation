@@ -15,7 +15,7 @@ public class WorkstationComponent implements Component<WorkstationComponent> {
     public Map<String, Boolean> supportedProcessTypes;
 
     @Override
-    public void copy(WorkstationComponent other) {
+    public void copyFrom(WorkstationComponent other) {
         this.supportedProcessTypes = Maps.newHashMap(other.supportedProcessTypes);
     }
 }

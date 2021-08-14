@@ -15,7 +15,7 @@ public class WorkstationProcessingComponent implements Component<WorkstationProc
     public Map<String, ProcessDef> processes = new HashMap<>();
 
     @Override
-    public void copy(WorkstationProcessingComponent other) {
+    public void copyFrom(WorkstationProcessingComponent other) {
         this.processes.clear();
         for (Map.Entry<String, ProcessDef> entry : other.processes.entrySet()) {
             ProcessDef oldDef = entry.getValue();

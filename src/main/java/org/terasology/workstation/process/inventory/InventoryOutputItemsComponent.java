@@ -24,7 +24,7 @@ public class InventoryOutputItemsComponent implements Component<InventoryOutputI
     }
 
     @Override
-    public void copy(InventoryOutputItemsComponent other) {
+    public void copyFrom(InventoryOutputItemsComponent other) {
         this.outputItems = Sets.newHashSet(other.outputItems);
     }
 }

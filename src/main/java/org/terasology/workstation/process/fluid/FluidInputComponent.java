@@ -11,7 +11,7 @@ public class FluidInputComponent implements Component<FluidInputComponent> {
     public Map<String, Float> fluidVolumes = Maps.newHashMap();
 
     @Override
-    public void copy(FluidInputComponent other) {
+    public void copyFrom(FluidInputComponent other) {
         this.fluidVolumes = Maps.newHashMap(other.fluidVolumes);
     }
 }

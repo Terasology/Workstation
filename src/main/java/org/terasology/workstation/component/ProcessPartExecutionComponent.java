@@ -8,7 +8,7 @@ public class ProcessPartExecutionComponent implements Component<ProcessPartExecu
     public String result;
 
     @Override
-    public void copy(ProcessPartExecutionComponent other) {
+    public void copyFrom(ProcessPartExecutionComponent other) {
         this.result = other.result;
     }
 }

@@ -15,7 +15,7 @@ public class SpecificInputSlotComponent implements Component<SpecificInputSlotCo
     }
 
     @Override
-    public void copy(SpecificInputSlotComponent other) {
+    public void copyFrom(SpecificInputSlotComponent other) {
         this.slot = other.slot;
     }
 }

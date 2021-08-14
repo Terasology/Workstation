@@ -8,7 +8,7 @@ public class ProcessTypeDescriptionComponent implements Component<ProcessTypeDes
     public String name;
 
     @Override
-    public void copy(ProcessTypeDescriptionComponent other) {
+    public void copyFrom(ProcessTypeDescriptionComponent other) {
         this.name = other.name;
     }
 }

@@ -19,7 +19,7 @@ public class InventoryInputProcessPartSlotAmountsComponent implements Component<
     }
 
     @Override
-    public void copy(InventoryInputProcessPartSlotAmountsComponent other) {
+    public void copyFrom(InventoryInputProcessPartSlotAmountsComponent other) {
         this.slotAmounts = Maps.newHashMap(other.slotAmounts);
     }
 }

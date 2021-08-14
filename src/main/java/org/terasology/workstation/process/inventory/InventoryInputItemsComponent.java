@@ -21,7 +21,7 @@ public class InventoryInputItemsComponent implements Component<InventoryInputIte
     }
 
     @Override
-    public void copy(InventoryInputItemsComponent other) {
+    public void copyFrom(InventoryInputItemsComponent other) {
         this.items = Lists.newArrayList(other.items);
     }
 }

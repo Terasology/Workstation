@@ -18,7 +18,7 @@ public class OutputTypeComponent implements Component<OutputTypeComponent> {
     }
 
     @Override
-    public void copy(OutputTypeComponent other) {
+    public void copyFrom(OutputTypeComponent other) {
         this.type = other.type;
     }
 }

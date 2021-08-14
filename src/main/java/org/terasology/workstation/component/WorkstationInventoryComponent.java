@@ -19,7 +19,7 @@ public class WorkstationInventoryComponent implements Component<WorkstationInven
     public Map<String, SlotAssignment> slotAssignments = Maps.newHashMap();
 
     @Override
-    public void copy(WorkstationInventoryComponent other) {
+    public void copyFrom(WorkstationInventoryComponent other) {
         this.slotAssignments.clear();
         for (Map.Entry<String, SlotAssignment> entry : other.slotAssignments.entrySet()) {
             SlotAssignment oldSlot = entry.getValue();

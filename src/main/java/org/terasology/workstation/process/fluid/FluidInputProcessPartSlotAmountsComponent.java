@@ -18,7 +18,7 @@ public class FluidInputProcessPartSlotAmountsComponent implements Component<Flui
     }
 
     @Override
-    public void copy(FluidInputProcessPartSlotAmountsComponent other) {
+    public void copyFrom(FluidInputProcessPartSlotAmountsComponent other) {
         this.slotAmounts = Maps.newHashMap(other.slotAmounts);
     }
 }

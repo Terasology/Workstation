@@ -12,7 +12,7 @@ public class InventoryOutputComponent implements Component<InventoryOutputCompon
     public Map<String, Integer> itemCounts = Maps.newHashMap();
 
     @Override
-    public void copy(InventoryOutputComponent other) {
+    public void copyFrom(InventoryOutputComponent other) {
         this.blockCounts = Maps.newHashMap(other.blockCounts);
         this.itemCounts = Maps.newHashMap(other.itemCounts);
     }

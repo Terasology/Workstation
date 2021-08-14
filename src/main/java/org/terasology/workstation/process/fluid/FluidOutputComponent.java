@@ -11,7 +11,7 @@ public class FluidOutputComponent implements Component<FluidOutputComponent> {
     public Map<String, Float> fluidVolumes = Maps.newHashMap();
 
     @Override
-    public void copy(FluidOutputComponent other) {
+    public void copyFrom(FluidOutputComponent other) {
         this.fluidVolumes = Maps.newHashMap(other.fluidVolumes);
     }
 }
