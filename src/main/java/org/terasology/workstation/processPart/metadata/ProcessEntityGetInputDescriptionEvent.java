@@ -16,7 +16,7 @@
 package org.terasology.workstation.processPart.metadata;
 
 import com.google.common.collect.Lists;
-import org.terasology.engine.entitySystem.event.Event;
+import org.terasology.gestalt.entitysystem.event.Event;
 import org.terasology.workstation.process.ProcessPartDescription;
 
 import java.util.List;
