@@ -21,9 +21,9 @@ import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
+import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.module.inventory.events.InventorySlotChangedEvent;
 import org.terasology.module.inventory.events.InventorySlotStackSizeChangedEvent;
-import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.event.WorkstationStateChanged;
 

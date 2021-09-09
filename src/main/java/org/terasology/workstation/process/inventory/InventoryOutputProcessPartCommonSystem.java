@@ -20,12 +20,13 @@ import org.slf4j.LoggerFactory;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.EventPriority;
+import org.terasology.engine.entitySystem.event.Priority;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
-import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.world.block.BlockManager;
+import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.processPart.ProcessEntityFinishExecutionEvent;
 import org.terasology.workstation.processPart.ProcessEntityIsInvalidEvent;
@@ -70,7 +71,8 @@ public class InventoryOutputProcessPartCommonSystem extends BaseComponentSystem 
         }
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
+    @Priority(EventPriority.PRIORITY_LOW)
+    @ReceiveEvent
     public void validateToStartExecution(ProcessEntityIsInvalidToStartEvent event, EntityRef processEntity,
                                          InventoryOutputComponent inventoryOutputComponent) {
         Set<EntityRef> outputItems = InventoryProcessPartUtils.createItems(inventoryOutputComponent.blockCounts, inventoryOutputComponent.itemCounts, false, entityManager, blockManager);
@@ -82,7 +84,8 @@ public class InventoryOutputProcessPartCommonSystem extends BaseComponentSystem 
         processEntity.removeComponent(InventoryOutputItemsComponent.class);
     }
 
-    @ReceiveEvent(priority = EventPriority.PRIORITY_LOW)
+    @Priority(EventPriority.PRIORITY_LOW)
+    @ReceiveEvent
     public void finish(ProcessEntityFinishExecutionEvent event, EntityRef processEntity,
                        InventoryOutputComponent inventoryOutputComponent) {
         Set<EntityRef> outputItems = InventoryProcessPartUtils.createItems(inventoryOutputComponent.blockCounts, inventoryOutputComponent.itemCounts, true, entityManager, blockManager);

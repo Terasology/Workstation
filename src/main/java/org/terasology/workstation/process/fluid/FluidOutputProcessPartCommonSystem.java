@@ -16,7 +16,6 @@
 package org.terasology.workstation.process.fluid;
 
 import com.google.common.collect.Maps;
-import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
@@ -25,6 +24,7 @@ import org.terasology.engine.registry.In;
 import org.terasology.fluid.system.FluidManager;
 import org.terasology.fluid.system.FluidRegistry;
 import org.terasology.fluid.system.FluidUtils;
+import org.terasology.gestalt.assets.ResourceUrn;
 import org.terasology.workstation.process.ProcessPartDescription;
 import org.terasology.workstation.process.WorkstationInventoryUtils;
 import org.terasology.workstation.processPart.ProcessEntityFinishExecutionEvent;
