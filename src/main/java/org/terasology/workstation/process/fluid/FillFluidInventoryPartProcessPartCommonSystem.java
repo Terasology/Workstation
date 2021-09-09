@@ -17,7 +17,6 @@ package org.terasology.workstation.process.fluid;
 
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.registry.CoreRegistry;
@@ -28,6 +27,7 @@ import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.fluid.event.BeforeFluidPutInInventory;
 import org.terasology.fluid.system.FluidManager;
 import org.terasology.fluid.system.FluidUtils;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.module.inventory.systems.InventoryManager;
 import org.terasology.module.inventory.systems.InventoryUtils;
 import org.terasology.workstation.component.SpecificInputSlotComponent;

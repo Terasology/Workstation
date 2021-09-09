@@ -16,10 +16,10 @@
 package org.terasology.workstation.system;
 
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.registry.In;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.module.inventory.components.InventoryComponent;
 import org.terasology.module.inventory.events.BeforeItemPutInInventory;
 import org.terasology.workstation.component.WorkstationComponent;

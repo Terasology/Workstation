@@ -16,12 +16,12 @@
 package org.terasology.workstation.system;
 
 import org.terasology.engine.entitySystem.entity.EntityRef;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
 import org.terasology.engine.registry.In;
 import org.terasology.fluid.component.FluidInventoryComponent;
 import org.terasology.fluid.event.BeforeFluidPutInInventory;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.process.WorkstationProcess;
 import org.terasology.workstation.process.fluid.ValidateFluidInventoryItem;
