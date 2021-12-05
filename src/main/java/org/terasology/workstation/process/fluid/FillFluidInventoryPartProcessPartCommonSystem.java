@@ -224,8 +224,8 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
      * @param fluid The fluid component that contains that current level of fluid in whatever.
      * @param maximumVolume The maximum volume of fluid that can be stored.
      */
-    private boolean canPartiallyStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer, 
-                                                                    FluidComponent fluid, float maximumVolume) {
+    private boolean canPartiallyStoreContentsOfContainerInFluidSlot(
+            FluidContainerItemComponent fluidContainer, FluidComponent fluid, float maximumVolume) {
         return (fluid == null && fluidContainer.volume <= maximumVolume)
                 || (fluid != null && fluid.fluidType.equals(fluidContainer.fluidType) && fluidContainer.volume > 0 && fluid.volume < maximumVolume);
     }
