@@ -23,8 +23,8 @@ public class WorkstationInventoryValidationSystem extends BaseComponentSystem {
         int slot = event.getSlot();
 
         boolean hasValidation = false;
-        for (WorkstationProcess workstationProcess :
-                workstationRegistry.getWorkstationProcesses(workstation.supportedProcessTypes.keySet())) {
+        for (WorkstationProcess workstationProcess : workstationRegistry.getWorkstationProcesses(
+                workstation.supportedProcessTypes.keySet())) {
             if (workstationProcess instanceof ValidateInventoryItem) {
                 ValidateInventoryItem inventoryValidator = (ValidateInventoryItem) workstationProcess;
                 hasValidation = true;
