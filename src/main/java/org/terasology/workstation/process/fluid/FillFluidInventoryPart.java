@@ -4,8 +4,5 @@ package org.terasology.workstation.process.fluid;
 
 import org.terasology.gestalt.entitysystem.component.EmptyComponent;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 public class FillFluidInventoryPart extends EmptyComponent<FillFluidInventoryPart> {
 }

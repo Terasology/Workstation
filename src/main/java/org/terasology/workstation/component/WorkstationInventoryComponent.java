@@ -10,9 +10,6 @@ import org.terasology.reflection.MappedContainer;
 
 import java.util.Map;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 @ForceBlockActive
 public class WorkstationInventoryComponent implements Component<WorkstationInventoryComponent> {
     @Replicate

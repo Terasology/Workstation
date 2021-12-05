@@ -1,18 +1,5 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.process;
 
 import org.terasology.engine.entitySystem.entity.EntityRef;
@@ -33,8 +20,6 @@ import org.terasology.workstation.processPart.metadata.ProcessEntityGetOutputDes
  * This is a template for handling all processing events, meant to get you started on a new process.
  */
 public class TemplateProcessPartCommonSystem extends BaseComponentSystem {
-
-    ///// Processing
 
     @ReceiveEvent
     public void validateProcess(ProcessEntityIsInvalidEvent event, EntityRef processEntity,
@@ -61,22 +46,15 @@ public class TemplateProcessPartCommonSystem extends BaseComponentSystem {
                                 InventoryInputComponent inventoryInputComponent) {
     }
 
-    ///// Inventory
-
     @ReceiveEvent
     public void isValidInventoryItem(ProcessEntityIsInvalidForInventoryItemEvent event, EntityRef processEntity,
                                      InventoryInputComponent inventoryInputComponent) {
     }
 
-    ///// Fluid
-
     @ReceiveEvent
     public void isValidFluid(ProcessEntityIsInvalidForFluidEvent event, EntityRef processEntity,
                              InventoryInputComponent inventoryInputComponent) {
     }
-
-
-    ///// Metadata
 
     @ReceiveEvent
     public void getInputDescriptions(ProcessEntityGetInputDescriptionEvent event, EntityRef processEntity,
