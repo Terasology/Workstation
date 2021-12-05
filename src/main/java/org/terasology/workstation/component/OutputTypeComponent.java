@@ -4,9 +4,6 @@ package org.terasology.workstation.component;
 
 import org.terasology.gestalt.entitysystem.component.Component;
 
-/**
- * @author Marcin Sciesinski <marcins78@gmail.com>
- */
 public class OutputTypeComponent implements Component<OutputTypeComponent> {
     public String type;
 

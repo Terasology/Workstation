@@ -1,25 +1,11 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.system;
 
 import org.terasology.engine.core.Time;
 import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.entity.lifecycleEvents.OnAddedComponent;
-import org.terasology.engine.entitySystem.event.ReceiveEvent;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterMode;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
@@ -30,6 +16,7 @@ import org.terasology.engine.monitoring.PerformanceMonitor;
 import org.terasology.engine.registry.CoreRegistry;
 import org.terasology.engine.registry.In;
 import org.terasology.engine.world.block.BlockComponent;
+import org.terasology.gestalt.entitysystem.event.ReceiveEvent;
 import org.terasology.workstation.component.WorkstationComponent;
 import org.terasology.workstation.component.WorkstationProcessingComponent;
 import org.terasology.workstation.event.WorkstationProcessRequest;
@@ -81,19 +68,19 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
         executingProcess = true;
         try {
             String actionId = event.getActionId();
-                long gameTime = time.getGameTimeInMs();
-                Map<String, WorkstationProcessingComponent.ProcessDef> processesCopy = new HashMap<>(workstationProcessing.processes);
-                for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
-                    WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
-                    if (processDef.processingFinishTime <= gameTime) {
-                        final WorkstationProcess workstationProcess = workstationRegistry.getWorkstationProcessById(
-                                workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
-                        finishProcessing(workstation, workstation, workstationProcess);
-                    }
+            long gameTime = time.getGameTimeInMs();
+            Map<String, WorkstationProcessingComponent.ProcessDef> processesCopy = new HashMap<>(workstationProcessing.processes);
+            for (Map.Entry<String, WorkstationProcessingComponent.ProcessDef> processes : processesCopy.entrySet()) {
+                WorkstationProcessingComponent.ProcessDef processDef = processes.getValue();
+                if (processDef.processingFinishTime <= gameTime) {
+                    final WorkstationProcess workstationProcess = workstationRegistry.getWorkstationProcessById(
+                            workstationComp.supportedProcessTypes.keySet(), processDef.processingProcessId);
+                    finishProcessing(workstation, workstation, workstationProcess);
                 }
+            }
 
-                pendingWorkstationChecks.add(workstation);
-                processPendingChecks();
+            pendingWorkstationChecks.add(workstation);
+            processPendingChecks();
         } finally {
             executingProcess = false;
             PerformanceMonitor.endActivity();
@@ -201,7 +188,7 @@ public class WorkstationAuthoritySystem extends BaseComponentSystem implements U
     }
 
     private void startProcessingManual(EntityRef instigator, EntityRef workstation, WorkstationProcess process,
-                                             WorkstationProcessRequest request, long gameTime) {
+                                       WorkstationProcessRequest request, long gameTime) {
         EntityRef processEntity = process.createProcessEntity();
         if (processEntity == null || processEntity == EntityRef.NULL) {
             // create a blank process entity;
