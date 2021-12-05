@@ -42,8 +42,8 @@ import java.util.Set;
  */
 @RegisterSystem
 public class InventoryInputProcessPartCommonSystem extends BaseComponentSystem {
-    private static final Logger logger = LoggerFactory.getLogger(InventoryInputProcessPartCommonSystem.class);
     public static final String WORKSTATIONINPUTCATEGORY = "INPUT";
+    private static final Logger logger = LoggerFactory.getLogger(InventoryInputProcessPartCommonSystem.class);
 
     @In
     InventoryManager inventoryManager;
