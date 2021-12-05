@@ -31,8 +31,8 @@ import java.util.Map;
 
 @RegisterSystem
 public class FluidInputProcessPartCommonSystem extends BaseComponentSystem {
-    private static final Logger logger = LoggerFactory.getLogger(FluidInputProcessPartCommonSystem.class);
     public static final String FLUIDINPUTCATEGORY = "FLUIDINPUT";
+    private static final Logger logger = LoggerFactory.getLogger(FluidInputProcessPartCommonSystem.class);
 
     @In
     FluidRegistry fluidRegistry;
