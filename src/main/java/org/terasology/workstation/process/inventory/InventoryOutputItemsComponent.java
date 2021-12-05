@@ -8,7 +8,6 @@ import org.terasology.gestalt.entitysystem.component.Component;
 
 import java.util.Set;
 
-
 public class InventoryOutputItemsComponent implements Component<InventoryOutputItemsComponent> {
     Set<EntityRef> outputItems = Sets.newHashSet();
 

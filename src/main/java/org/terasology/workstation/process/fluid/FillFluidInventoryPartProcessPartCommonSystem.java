@@ -1,21 +1,7 @@
-/*
- * Copyright 2016 MovingBlocks
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// Copyright 2021 The Terasology Foundation
+// SPDX-License-Identifier: Apache-2.0
 package org.terasology.workstation.process.fluid;
 
-import org.terasology.engine.entitySystem.entity.EntityManager;
 import org.terasology.engine.entitySystem.entity.EntityRef;
 import org.terasology.engine.entitySystem.systems.BaseComponentSystem;
 import org.terasology.engine.entitySystem.systems.RegisterSystem;
@@ -38,22 +24,18 @@ import org.terasology.workstation.processPart.inventory.ProcessEntityIsInvalidFo
 
 @RegisterSystem
 public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponentSystem {
-    @In
-    EntityManager entityManager;
-    @In
-    FluidManager fluidManager;
-
     public static final float DELTA = 0.001f;
 
-    ///// Processing
+    @In
+    FluidManager fluidManager;
 
     /**
      * Validate the process to ensure that it's correct and ready for execution.
      *
-     * @param event                     The event which has a reference to the workstation and instigator.
-     * @param processEntity             The reference to the process that's being verified.
-     * @param fillFluidInventoryPart    A component included for filtering out non-matching events. Here, we only want
-     *                                  processes related to filling an inventory slot with fluid.
+     * @param event The event which has a reference to the workstation and instigator.
+     * @param processEntity The reference to the process that's being verified.
+     * @param fillFluidInventoryPart A component included for filtering out non-matching events. Here, we only want processes
+     *         related to filling an inventory slot with fluid.
      */
     @ReceiveEvent
     public void validateToStartExecution(ProcessEntityIsInvalidToStartEvent event, EntityRef processEntity,
@@ -74,10 +56,10 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Start execution of the fluid inventory slot filling process.
      *
-     * @param event                     The event which has a reference to the workstation and instigator.
-     * @param processEntity             The reference to the process being executed.
-     * @param fillFluidInventoryPart    A component included for filtering out non-matching events. Here, we only want
-     *                                  processes related to filling inventory slots with fluid.
+     * @param event The event which has a reference to the workstation and instigator.
+     * @param processEntity The reference to the process being executed.
+     * @param fillFluidInventoryPart A component included for filtering out non-matching events. Here, we only want processes
+     *         related to filling inventory slots with fluid.
      */
     @ReceiveEvent
     public void startExecution(ProcessEntityStartExecutionEvent event, EntityRef processEntity,
@@ -117,10 +99,10 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Verify if the provided fluid container(s) and fluid inventory are valid for this process.
      *
-     * @param event                     The event which has a reference to the workstation, slot number, item, and instigator.
-     * @param processEntity             The reference to the process that's intending to use these items.
-     * @param fillFluidInventoryPart    A component included for filtering out non-matching events. Here, we only want
-     *                                  processes related to filling an inventory slot with fluid.
+     * @param event The event which has a reference to the workstation, slot number, item, and instigator.
+     * @param processEntity The reference to the process that's intending to use these items.
+     * @param fillFluidInventoryPart A component included for filtering out non-matching events. Here, we only want processes
+     *         related to filling an inventory slot with fluid.
      */
     @ReceiveEvent
     public void isValidInventoryItem(ProcessEntityIsInvalidForInventoryItemEvent event, EntityRef processEntity,
@@ -171,9 +153,9 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Check to see if we can use the fluid container item.
      *
-     * @param workstation       The workstation which interacts with and houses the fluid inventory.
-     * @param fluidInventory    The component which stores the inventory of fluids.
-     * @param containerItem     An entity that is a fluid container.
+     * @param workstation The workstation which interacts with and houses the fluid inventory.
+     * @param fluidInventory The component which stores the inventory of fluids.
+     * @param containerItem An entity that is a fluid container.
      */
     private boolean canEmptyContainerItem(EntityRef workstation, FluidInventoryComponent fluidInventory, EntityRef containerItem) {
         FluidContainerItemComponent fluidContainer = containerItem.getComponent(FluidContainerItemComponent.class);
@@ -197,9 +179,8 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
                     } finally {
                         tempEntity.destroy();
                     }
-                }
-                // If some of the contents of the container can be stored in the fluid inventory.
-                else if (canPartiallyStoreContentsOfContainerInFluidSlot(fluidContainer, fluid, maximumVolume)) {
+                } else if (canPartiallyStoreContentsOfContainerInFluidSlot(fluidContainer, fluid, maximumVolume)) {
+                    // If some of the contents of the container can be stored in the fluid inventory.
                     EntityRef tempEntity = containerItem.copy();
                     try {
                         FluidContainerItemComponent fluidContainerCopy = tempEntity.getComponent(FluidContainerItemComponent.class);
@@ -227,9 +208,9 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Check to see if we can store the entire volume of the fluid container plus pre-existing fluid in this fluid slot.
      *
-     * @param fluidContainer    The fluid container item component that houses the fluid.
-     * @param fluid             The fluid component that contains that current level of fluid in whatever.
-     * @param maximumVolume     The maximum volume of fluid that can be stored.
+     * @param fluidContainer The fluid container item component that houses the fluid.
+     * @param fluid The fluid component that contains that current level of fluid in whatever.
+     * @param maximumVolume The maximum volume of fluid that can be stored.
      */
     private boolean canStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer, FluidComponent fluid, float maximumVolume) {
         return (fluid == null && fluidContainer.volume <= maximumVolume)
@@ -239,11 +220,12 @@ public class FillFluidInventoryPartProcessPartCommonSystem extends BaseComponent
     /**
      * Check to see if we can partially store the some of the volume of the fluid container in this fluid slot.
      *
-     * @param fluidContainer    The fluid container item component that houses the fluid.
-     * @param fluid             The fluid component that contains that current level of fluid in whatever.
-     * @param maximumVolume     The maximum volume of fluid that can be stored.
+     * @param fluidContainer The fluid container item component that houses the fluid.
+     * @param fluid The fluid component that contains that current level of fluid in whatever.
+     * @param maximumVolume The maximum volume of fluid that can be stored.
      */
-    private boolean canPartiallyStoreContentsOfContainerInFluidSlot(FluidContainerItemComponent fluidContainer, FluidComponent fluid, float maximumVolume) {
+    private boolean canPartiallyStoreContentsOfContainerInFluidSlot(
+            FluidContainerItemComponent fluidContainer, FluidComponent fluid, float maximumVolume) {
         return (fluid == null && fluidContainer.volume <= maximumVolume)
                 || (fluid != null && fluid.fluidType.equals(fluidContainer.fluidType) && fluidContainer.volume > 0 && fluid.volume < maximumVolume);
     }
